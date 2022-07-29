@@ -9,15 +9,14 @@
 in {
   options.services.fish = {
     enable = lib.mkEnableOption "fish";
+    port = lib.mkOptionDefault 8080; 
   };
-
-  port = lib.mkOptionDefault "8080"; 
   
   config = lib.mkIf cfg.enable {
     systemd.services.fish = {
       wantedBy = ["multi-user.target"];
       serviceConfig = {
-        ExecStart = "${appEnv}/bin/waitress-serve --port=${port} fish:app";
+        ExecStart = "${appEnv}/bin/waitress-serve --port=${cfg.port} fish:app";
       };
     };
   };
