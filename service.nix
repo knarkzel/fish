@@ -9,7 +9,10 @@
 in {
   options.services.fish = {
     enable = lib.mkEnableOption "fish";
-    port = lib.mkOptionDefault 8080; 
+    port = lib.mkOption {
+      type = types.int;
+      description = "Port to run application on";
+    };
   };
   
   config = lib.mkIf cfg.enable {
