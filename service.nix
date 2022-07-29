@@ -10,7 +10,7 @@ in {
   options.services.fish = {
     enable = lib.mkEnableOption "fish";
     port = lib.mkOption {
-      type = types.int;
+      type = lib.types.int;
       description = "Port to run application on";
     };
   };
