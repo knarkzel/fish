@@ -19,7 +19,7 @@ in {
     systemd.services.fish = {
       wantedBy = ["multi-user.target"];
       serviceConfig = {
-        ExecStart = "${appEnv}/bin/waitress-serve --port=${cfg.port} fish:app";
+        ExecStart = "${appEnv}/bin/waitress-serve --port=${toString cfg.port} fish:app";
       };
     };
   };
