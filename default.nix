@@ -5,7 +5,10 @@ with python3Packages;
     src = ./fish;
 
     format = "other";
-    shellHook = "export FLASK_APP=fish";
+    shellHook = ''
+    export FLASK_APP=fish
+    export FLASK_ENV=development
+    '';
     propagatedBuildInputs = [flask];
 
     installPhase = ''
