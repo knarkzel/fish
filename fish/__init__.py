@@ -1,17 +1,22 @@
-from flask import Flask, render_template
+import os
+from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-        return render_template("index.html")
+    images = []
+    for file in os.listdir("./fish/static/images"):
+            if file != ".gitkeep":
+                    images.append("/static/images/" + file)
+    return render_template("index.html", images=images)
 
-@app.route('/comments')
-def comments():
-    comments = ['This is the first comment.',
-                'This is the second comment.',
-                'This is the third comment.',
-                'gnome'
-                ]
-
-    return render_template('comments.html', comments=comments)
+@app.route("/upload", methods=["GET", "POST"])
+def upload_file():
+    if request.method == "POST":
+        file = request.files["file"]
+        path = os.path.join("./fish/static/images", file.filename)
+        file.save(path)
+        return redirect("/")
+    else:
+        return render_template('upload.html')
