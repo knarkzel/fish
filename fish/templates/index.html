@@ -1,9 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<ul>
   {% for image in images %}
       <img src="{{ image }}">
   {% endfor %}
-</ul>
 {% endblock %}
