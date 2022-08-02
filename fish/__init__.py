@@ -78,6 +78,5 @@ def upload_file():
 
 @app.route("/map")
 def map():
-    m = folium.Map(location=[45.5236, -122.6750]) # start location
-    m.save("./fish/templates/map.html")
-    return render_template("map.html")
+    map = folium.Map(location=[45.5236, -122.6750])
+    return render_template('map.html', map=map._repr_html_())
