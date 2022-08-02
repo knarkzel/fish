@@ -1,13 +1,10 @@
 import os
 from flask import Flask, render_template, request, redirect, flash, session
 import base64
-import pathlib
-
-root_folder = pathlib.Path(__file__).parent.resolve()
-image_folder = os.path.join(root_folder, "static/images")
+import folium
 
 app = Flask(__name__)
-app.secret_key = "821da87006d0296aea3c0f091a88c097d4709493f7a972566b444e33c3a948bb"
+app.secret_key = "good-secret_key"
 
 users = []
 class User:
@@ -18,11 +15,18 @@ class User:
     def __eq__(self, other):
         return self.username == other.username
 
-@app.route("/register", methods=["GET", "POST"])
+image = {
+    "filename": {
+        "location": 24,
+        "date": 2022,
+    },
+}
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
         user = User(username, password)
         if user in users:
             return user.id
@@ -34,17 +38,16 @@ def register():
     else:
         return render_template("register.html")
     
-@app.route("/logout")
+@app.route('/logout')
 def logout():
     session.clear()
     return redirect("/")
-    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form['username']
+        password = request.form['password']
         login = User(username, password)
         for user in users:
             if user.id == login.id:
@@ -55,10 +58,10 @@ def login():
     else:
         return render_template("login.html")
 
-@app.route("/")
+@app.route('/')
 def index():
     images = []
-    for file in os.listdir(image_folder):
+    for file in os.listdir("./fish/static/images"):
             if file != ".gitkeep":
                     images.append("/static/images/" + file)
     return render_template("index.html", images=images)
@@ -67,12 +70,14 @@ def index():
 def upload_file():
     if request.method == "POST":
         file = request.files["file"]
-        path = os.path.join(image_folder, file.filename)
+        path = os.path.join("./fish/static/images", file.filename)
         file.save(path)
         return redirect("/")
     else:
-        return render_template("upload.html")
+        return render_template('upload.html')
 
-
-
-
+@app.route("/map")
+def map():
+    m = folium.Map(location=[45.5236, -122.6750]) # start location
+    m.save("./fish/templates/map.html")
+    return render_template("map.html")
