@@ -5,7 +5,7 @@ import folium
 from exif import Image
 from datetime import datetime
 import hashlib
-from PIL import Image
+from PIL import Image as PILImage
 import io
 
 app = Flask(__name__)
@@ -70,16 +70,13 @@ def extract_exif(path, filename):
     pos = []
     with open(path, "rb") as img_file:
         img = Image(img_file)
-        if img.gps_latitude:
-            for x in range(0, 2):
-                ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
-                new = (img.gps_longitude if x else img.gps_latitude)
-                new = str(new).strip("()").split(",")
-                new = [float(x) for x in new]
-                new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
-                pos.append(new)
-        else:
-            return "no exif :("
+        for x in range(0, 2):
+            ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
+            new = (img.gps_longitude if x else img.gps_latitude)
+            new = str(new).strip("()").split(",")
+            new = [float(x) for x in new]
+            new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
+            pos.append(new)
     image[filename] = {
         "pos": pos,
         "date": datetime.now()
@@ -94,17 +91,17 @@ def upload_file():
         hash = hashlib.sha256(bytes).hexdigest()
 
         # save as webp
-        name = hash + ".webp"
+        name = hash + ".png"
         path = os.path.join("./fish/static/images", name)
-        image = Image.open(io.BytesIO(bytes))
-        image.save(path, format="webp")
+        image = PILImage.open(io.BytesIO(bytes))
+        image.save(path, format="png")
         return redirect("/")
     else:
         return render_template('upload.html')
 
 @app.route("/map")
 def map():
-    map = folium.Map(location=[50.5, 8], zoom_start = 2)
+    map = folium.Map(location=[50.5, 8], zoom_start=2)
     for file in os.listdir("./fish/static/images"):
         path = os.path.join("./fish/static/images", file)
         if file != ".gitkeep":
