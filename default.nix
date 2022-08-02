@@ -9,7 +9,7 @@ with python3Packages;
     export FLASK_APP=fish
     export FLASK_ENV=development
     '';
-    propagatedBuildInputs = [flask exif folium];
+    propagatedBuildInputs = [flask exif folium pillow];
 
     installPhase = ''
       runHook preInstall

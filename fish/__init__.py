@@ -5,6 +5,8 @@ import folium
 from exif import Image
 from datetime import datetime
 import hashlib
+from PIL import Image
+import io
 
 app = Flask(__name__)
 app.secret_key = "good-secret_key"
@@ -89,11 +91,11 @@ def upload_file():
         bytes = file.read()
         hash = hashlib.sha256(bytes).hexdigest()
 
-        # save
-        name = hash + ".jpg"
+        # save as webp
+        name = hash + ".webp"
         path = os.path.join("./fish/static/images", name)
-        with open(path, 'wb') as f: 
-            f.write(bytes)
+        image = Image.open(io.BytesIO(bytes))
+        image.save(path, format="webp")
         return redirect("/")
     else:
         return render_template('upload.html')
