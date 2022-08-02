@@ -3,19 +3,12 @@ body {
 }
 
 nav {
-    padding: 1em;
-    font-size: 1.5em;
-    text-align: center;
+    font-size: 1.25em;
 }
 
-nav > a {
-    color: white;
-    padding: 0.5em 1em;
-    background: #09476d;
-    border-radius: 25px;
-}
-
-nav > a:hover {
-    background: #09636d;
-    text-decoration: none;
+#images {
+  display: grid;
+  grid-gap: 0.5em;
+  justify-content: center;
+  grid-template-columns: repeat(3, minmax(100px, 250px));
 }

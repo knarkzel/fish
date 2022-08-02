@@ -2,18 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fish</title>
+    <title>Fish visualizer</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.png">
     <link rel="stylesheet" href="/static/water.css">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <nav>
-    <a href="#">{{ session["user_name"] }}</a>
-    <a href="/register">Register</a>
-    <a href="/login">Login</a>
-    <a href="/upload">Upload</a>
-    <a href="/logout">Logout</a>
-    <a href="/map">Map</a>
+    <ul>
+      {% if session["user_name"]|length %}
+      <li><a href="#">{{ session["user_name"] }}</a></li>
+      {% endif %}
+      <li><a href="/map">Map</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/upload">Upload</a></li>
+      <li><a href="/logout">Logout</a></li>
+      <li><a href="/register">Register</a></li>
+    </ul>
   </nav>
   <main>
     {% block content %} {% endblock %}
