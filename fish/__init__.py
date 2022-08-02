@@ -101,6 +101,8 @@ def upload_file():
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start = 2)
     for file in os.listdir("./fish/static/images"):
-            if file != ".gitkeep":
-                folium.Marker(image[file]["pos"]).add_to(map)
+        path = os.path.join("./fish/static/images", file)
+        extract_exif(path, file)
+        if file != ".gitkeep":
+            folium.Marker(image[file]["pos"]).add_to(map)
     return render_template('map.html', map=map._repr_html_())
