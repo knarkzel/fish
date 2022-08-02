@@ -86,13 +86,14 @@ def upload_file():
     if request.method == "POST":
         # hash
         file = request.files["file"]
-        hash = hashlib.sha256()
-        for byte_block in iter(lambda: file.read(4096), b""):
-            hash.update(byte_block)
+        bytes = file.read()
+        hash = hashlib.sha256(bytes).hexdigest()
 
-        # save and extract exif
-        name = hash.hexdigest() + ".jpg"
+        # save
+        name = hash + ".jpg"
         path = os.path.join("./fish/static/images", name)
+        with open(path, 'wb') as f: 
+            f.write(bytes)
         return redirect("/")
     else:
         return render_template('upload.html')
