@@ -68,7 +68,7 @@ def extract_exif(path, filename):
     pos = []
     with open(path, "rb") as img_file:
         img = Image(img_file)
-        if img.gps_latitude and img.gps_longitude:
+        if img.gps_latitude:
             for x in range(0, 2):
                 ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
                 new = (img.gps_longitude if x else img.gps_latitude)
@@ -76,6 +76,8 @@ def extract_exif(path, filename):
                 new = [float(x) for x in new]
                 new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
                 pos.append(new)
+        else:
+            return "no exif :("
     image[filename] = {
         "pos": pos,
         "date": datetime.now()
@@ -103,7 +105,7 @@ def map():
     map = folium.Map(location=[50.5, 8], zoom_start = 2)
     for file in os.listdir("./fish/static/images"):
         path = os.path.join("./fish/static/images", file)
-        extract_exif(path, file)
         if file != ".gitkeep":
+            extract_exif(path, file)
             folium.Marker(image[file]["pos"]).add_to(map)
     return render_template('map.html', map=map._repr_html_())
