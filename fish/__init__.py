@@ -4,6 +4,7 @@ import base64
 import folium
 from exif import Image
 from datetime import datetime
+import hashlib
 
 app = Flask(__name__)
 app.secret_key = "good-secret_key"
@@ -59,33 +60,39 @@ def login():
 def index():
     images = []
     for file in os.listdir("./fish/static/images"):
-            if file != ".gitkeep":
-                    images.append("/static/images/" + file)
+        if file != ".gitkeep":
+            images.append("/static/images/" + file)
     return render_template("index.html", images=images)
+
+def extract_exif(path, filename):
+    pos = []
+    with open(path, "rb") as img_file:
+        img = Image(img_file)
+        if img.gps_latitude and img.gps_longitude:
+            for x in range(0, 2):
+                ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
+                new = (img.gps_longitude if x else img.gps_latitude)
+                new = str(new).strip("()").split(",")
+                new = [float(x) for x in new]
+                new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
+                pos.append(new)
+    image[filename] = {
+        "pos": pos,
+        "date": datetime.now()
+    }
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
+        # hash
         file = request.files["file"]
-        path = os.path.join("./fish/static/images", file.filename)
-        file.save(path)
+        hash = hashlib.sha256()
+        for byte_block in iter(lambda: file.read(4096), b""):
+            hash.update(byte_block)
 
-        pos = []
-        with open(path, "rb") as img_file:
-            img = Image(img_file)
-            if img.gps_latitude and img.gps_longitude:
-                for x in range(0,2):
-                    ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
-                    new = (img.gps_longitude if x else img.gps_latitude)
-                    new = str(new).strip("()").split(",")
-                    new = [float(x) for x in new]
-                    new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
-                    pos.append(new)
-        image[file.filename] = {
-            "pos": pos,
-            "date": datetime.now()
-        }
-        print(image)
+        # save and extract exif
+        name = hash.hexdigest() + ".jpg"
+        path = os.path.join("./fish/static/images", name)
         return redirect("/")
     else:
         return render_template('upload.html')
