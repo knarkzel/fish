@@ -92,5 +92,8 @@ def upload_file():
 
 @app.route("/map")
 def map():
-    map = folium.Map(location=[50.5, 8])
+    map = folium.Map(location=[50.5, 8], zoom_start = 2)
+    for file in os.listdir("./fish/static/images"):
+            if file != ".gitkeep":
+                folium.Marker(image[file]["pos"]).add_to(map)
     return render_template('map.html', map=map._repr_html_())
