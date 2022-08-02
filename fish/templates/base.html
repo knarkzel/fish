@@ -3,10 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Fish</title>
+    <link rel="stylesheet" href="/static/water.css">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <li><a href="/logout">logout</a></li>
-  {% block content %} {% endblock %}
+  <nav>
+    <a href="#">{{ session["user_name"] }}</a>
+    <a href="/register">Register</a>
+    <a href="/login">Login</a>
+    <a href="/upload">Upload</a>
+    <a href="/logout">Logout</a>
+  </nav>
+  <main>
+    {% block content %} {% endblock %}
+  </main>
 </body>
 </html>

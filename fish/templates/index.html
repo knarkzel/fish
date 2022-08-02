@@ -1,12 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<p>USER: {{ session["user_name"] }}</p>
-<h1>Hello World!</h1>
 <ul>
-  <li><a href="/register">register</a></li>
-  <li><a href="/login">login</a></li>
-  <li><a href="/upload">Upload file</a></li>
   {% for image in images %}
       <img src="{{ image }}">
   {% endfor %}

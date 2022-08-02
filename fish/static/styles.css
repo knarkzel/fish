@@ -1,7 +1,21 @@
-html {
-  margin: auto;
-  max-width: 50rem;
-  padding: 0 1em;
-  line-height: 1.75;
-  font-size: 1.5em;
+body {
+    margin: 0 auto;
+}
+
+nav {
+    padding: 1em;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+nav > a {
+    color: white;
+    padding: 0.5em 1em;
+    background: #09476d;
+    border-radius: 25px;
+}
+
+nav > a:hover {
+    background: #09636d;
+    text-decoration: none;
 }
