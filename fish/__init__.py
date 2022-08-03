@@ -62,7 +62,6 @@ def store_exif(image, name):
         "pos": pos,
         "date": datetime.now()
     }
-    print(name)
     save_database(db)
 
 def generate_thumbnail(img, hash):
