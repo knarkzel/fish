@@ -8,12 +8,31 @@ import hashlib
 from PIL import Image as PILImage
 import io
 import secrets
+import pickle
 
-users = {}
-image = {}
+# database
+db_path = "database.csv"
+
+def load_database():
+    if os.path.exists(db_path):
+        with open(db_path, "rb") as file:
+            return pickle.load(file)
+    else:
+        return {
+            "users": {},
+            "images": {},
+        }
+
+def save_database(db):
+    with open(db_path, "wb") as file:
+        pickle.dump(db, file)
+
+# flask
+db = load_database()
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
+# other
 def hash(input):
     return hashlib.sha256(input.encode("utf-8")).hexdigest()
 
@@ -45,16 +64,18 @@ def extract_exif(path, filename):
         "pos": pos,
         "date": datetime.now()
     }
-    
+
+# routes
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         user = get_user(request)
         id = user["id"]
-        if id in users:
+        if id in db["users"]:
             return render_template("error.html", message="User already exists.")
         else:
-            users[id] = user
+            db["users"][id] = user
+            save_database(db)
             set_session(user)
             return redirect("/")
     else:
@@ -65,7 +86,7 @@ def login():
     if request.method == "POST":
         user = get_user(request)
         id = user["id"]
-        if id in users and users[id]["password"] == user["password"]:
+        if id in db["users"] and db["users"][id]["password"] == user["password"]:
             set_session(user)
             return redirect("/")
         else:
