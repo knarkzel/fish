@@ -6,6 +6,10 @@ nav {
     font-size: 1.25em;
 }
 
+ul {
+    margin-top: 0;
+}
+
 #images {
   display: grid;
   grid-gap: 0.5em;

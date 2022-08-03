@@ -64,8 +64,36 @@ def extract_exif(path, filename):
         "date": datetime.now()
     }
 
+def generate_thumbnail(img, hash):
+    # thumbnail
+    w = img.size[0]
+    h = img.size[1]
+    max_res = 500
+    if h > w:
+        if w > max_res:
+            length = max_res
+        else:
+            length = w
+            rz_img = img.resize((length, int(h * (length / w)))) 
+            loss = rz_img.size[1] - length
+            thumb = rz_img.crop(
+                box = (0, loss / 2, length, rz_img.size[1] - loss / 2))
+    else:
+        if h > max_res:
+            length = max_res
+        else:
+            length = h
+            rz_img = img.resize((int(w * (length / h)), length)) 
+            loss = rz_img.size[0] - length
+            thumb = rz_img.crop(
+                box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
+            
+            name = hash + "-thumbnail.webp"
+            path = os.path.join("./fish/static/images", name)                
+            thumb.save(path)    
+            
 # routes
-@app.route('/')
+@app.route("/")
 def index():
     images = []
     for file in os.listdir("./fish/static/images"):
@@ -73,9 +101,9 @@ def index():
             images.append("/static/images/" + file)
     return render_template("index.html", images=images)
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == 'POST':
+    if request.method == "POST":
         user = get_user(request)
         id = user["id"]
         if id in db["users"]:
@@ -101,7 +129,7 @@ def login():
     else:
         return render_template("login.html")
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
     session.clear()
     return redirect("/")
@@ -109,51 +137,20 @@ def logout():
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
-        
-
+        # hash
         file = request.files["file"]
+        bytes = file.read()
+        hash = hashlib.sha256(bytes).hexdigest()
 
-        name = "edit" + ".png"
+        # save as webp
+        name = hash + ".webp"
         path = os.path.join("./fish/static/images", name)
-        file.save(path)
-
-        # with open(path, "rb") as file:
-        #     bytes = hashlib.sha256(file.read(32)).hexdigest()
-        #     print(bytes) 
-        
-        img = PILImage.open(path)
-        w = img.size[0]
-        h = img.size[1]
-        max_res = 500
-        if h > w:
-            if w > max_res:
-                length = max_res
-            else:
-                length = w
-            rz_img = img.resize((length, int(h * (length / w)))) 
-            loss = rz_img.size[1] - length
-            thumb = rz_img.crop(
-                box = (0, loss / 2, length, rz_img.size[1] - loss / 2))
-        else:
-            if h > max_res:
-                length = max_res
-            else:
-                length = h
-            rz_img = img.resize((int(w * (length / h)), length)) 
-            loss = rz_img.size[0] - length
-            thumb = rz_img.crop(
-                box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
-        print(thumb.size)
-
-        name = "edit" + "THUMB" + ".png"
-        path = os.path.join("./fish/static/images", name)                
-        thumb.save(path)
-
-
-
+        image = PILImage.open(io.BytesIO(bytes))
+        image.save(path, format="webp")
+        generate_thumbnail(image, hash)
         return redirect("/")
     else:
-        return render_template('upload.html')
+        return render_template("upload.html")
 
 @app.route("/map")
 def map():
@@ -163,7 +160,7 @@ def map():
             path = os.path.join("./fish/static/images", file)
             extract_exif(path, file)
             folium.Marker(image[file]["pos"]).add_to(map)
-    return render_template('map.html', map=map._repr_html_())
+    return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
 def profile(username):
