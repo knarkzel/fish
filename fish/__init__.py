@@ -48,21 +48,22 @@ def set_session(user):
     session["id"] = user["id"]
     session["username"] = user["username"]
 
-def extract_exif(path, filename):
+def store_exif(image, name):
     pos = []
-    with open(path, "rb") as img_file:
-        img = Image(img_file)
-        for x in range(0, 2):
-            ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
-            new = (img.gps_longitude if x else img.gps_latitude)
-            new = str(new).strip("()").split(",")
-            new = [float(x) for x in new]
-            new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
-            pos.append(new)
-    db["images"][filename] = {
+    img = Image(image)
+    for x in range(0, 2):
+        ref = (img.gps_longitude_ref if x else img.gps_latitude_ref)
+        new = (img.gps_longitude if x else img.gps_latitude)
+        new = str(new).strip("()").split(",")
+        new = [float(x) for x in new]
+        new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
+        pos.append(new)
+    db["images"][name] = {
         "pos": pos,
         "date": datetime.now()
     }
+    print(name)
+    save_database(db)
 
 def generate_thumbnail(img, hash):
     # thumbnail
@@ -145,9 +146,10 @@ def upload_file():
         file = request.files["file"]
         bytes = file.read()
         hash = hashlib.sha256(bytes).hexdigest()
-
+        
         # save as webp
         name = hash + ".webp"
+        store_exif(bytes, name)
         path = os.path.join("./fish/static/images", name)
         image = PILImage.open(io.BytesIO(bytes))
         image.save(path, format="webp")
@@ -162,7 +164,7 @@ def map():
     # for file in os.listdir("./fish/static/images"):
     #     if file != ".gitkeep":
     #         path = os.path.join("./fish/static/images", file)
-    #         extract_exif(path, file)
+    #         extract_exif(path)
     #         folium.Marker(image[file]["pos"]).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
