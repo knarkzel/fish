@@ -91,14 +91,18 @@ def generate_thumbnail(img, hash):
             name = hash + "-thumbnail.webp"
             path = os.path.join("./fish/static/images", name)                
             thumb.save(path)    
-            
+
+def get_images(filter):
+    images = []
+    for file in os.listdir("./fish/static/images"):
+        if filter(file):
+            images.append("/static/images/" + file)
+    return images
+
 # routes
 @app.route("/")
 def index():
-    images = []
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep":
-            images.append("/static/images/" + file)
+    images = get_images(lambda file: "thumbnail" in file)
     return render_template("index.html", images=images)
 
 @app.route("/register", methods=["GET", "POST"])
@@ -155,11 +159,11 @@ def upload_file():
 @app.route("/map")
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start=2)
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep":
-            path = os.path.join("./fish/static/images", file)
-            extract_exif(path, file)
-            folium.Marker(image[file]["pos"]).add_to(map)
+    # for file in os.listdir("./fish/static/images"):
+    #     if file != ".gitkeep":
+    #         path = os.path.join("./fish/static/images", file)
+    #         extract_exif(path, file)
+    #         folium.Marker(image[file]["pos"]).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
