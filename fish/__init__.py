@@ -70,8 +70,7 @@ def index():
     images = []
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep":
-            if db["images"][file]["thumbnail"]:
-                images.append("/static/images/" + file)
+            images.append("/static/images/" + file)
     return render_template("index.html", images=images)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -125,25 +124,31 @@ def upload_file():
         img = PILImage.open(path)
         w = img.size[0]
         h = img.size[1]
+        max_res = 500
         if h > w:
-            length = w
-            rz_img = img.resize((w, int(h * (length / w)))) 
-            loss = (rz_img.size[1] - length)
+            if w > max_res:
+                length = max_res
+            else:
+                length = w
+            rz_img = img.resize((length, int(h * (length / w)))) 
+            loss = rz_img.size[1] - length
             thumb = rz_img.crop(
-                box = (0, loss / 2, length, h - loss / 2))
+                box = (0, loss / 2, length, rz_img.size[1] - loss / 2))
         else:
-            length = h
+            if h > max_res:
+                length = max_res
+            else:
+                length = h
             rz_img = img.resize((int(w * (length / h)), length)) 
-            loss = (rz_img.size[0] - length)
+            loss = rz_img.size[0] - length
             thumb = rz_img.crop(
-                box = (loss / 2, 0, w - loss / 2, length))
+                box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
+        print(thumb.size)
 
         name = "edit" + "THUMB" + ".png"
         path = os.path.join("./fish/static/images", name)                
         thumb.save(path)
-        image[name] = {
-            "thumbnail": True
-        }
+
 
 
         return redirect("/")
