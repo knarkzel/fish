@@ -4,10 +4,14 @@ import pickle
 import folium
 import secrets
 import hashlib
+import pathlib
 from exif import Image
 from datetime import datetime
 from PIL import Image as PILImage
 from flask import Flask, render_template, request, redirect, flash, session
+
+root_folder = pathlib.Path(__file__).parent.resolve()
+image_folder = os.path.join(root_folder, "static/images")
 
 # database
 db_path = "database.csv"
@@ -94,7 +98,7 @@ def generate_thumbnail(img, hash):
 
 def get_images(filter):
     images = []
-    for file in os.listdir("./fish/static/images"):
+    for file in os.listdir(image_folder):
         if file != ".gitkeep" and filter(file):
             images.append("/static/images/" + file)
     return images
@@ -170,11 +174,6 @@ def upload_file():
 @app.route("/map")
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start=2)
-    # for file in os.listdir("./fish/static/images"):
-    #     if file != ".gitkeep":
-    #         path = os.path.join("./fish/static/images", file)
-    #         extract_exif(path)
-    #         folium.Marker(image[file]["pos"]).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
