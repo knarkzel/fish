@@ -1,0 +1,9 @@
+{% if images|length %}
+<div id=images>
+  {% for image in images %}
+  <img src="{{ image }}">
+  {% endfor %}
+</div>
+{% else %}
+<p>No images have been uploaded.</p>
+{% endif %}
