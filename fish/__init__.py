@@ -96,9 +96,18 @@ def generate_thumbnail(img, hash):
 def get_images(filter):
     images = []
     for file in os.listdir("./fish/static/images"):
-        if filter(file):
+        if file != ".gitkeep" and filter(file):
             images.append("/static/images/" + file)
     return images
+
+def store_metadata(hash):
+    db["images"][hash + ".webp"] = {
+        "username": session["username"],
+    }
+    db["images"][hash + "-thumbnail.webp"] = {
+        "username": session["username"],
+    }
+    save_database(db)
 
 # routes
 @app.route("/")
@@ -154,6 +163,7 @@ def upload_file():
         image = PILImage.open(io.BytesIO(bytes))
         image.save(path, format="webp")
         generate_thumbnail(image, hash)
+        store_metadata(hash)
         return redirect("/")
     else:
         return render_template("upload.html")
@@ -172,6 +182,7 @@ def map():
 def profile(username):
     id = hash(username)
     if id in db["users"]:
-        return render_template("profile.html", user=db["users"][id])
+        images = get_images(lambda file: db["images"][file]["username"] == username and "thumbnail" in file)
+        return render_template("profile.html", user=db["users"][id], images=images)
     else:
         return render_template("error.html", message="User does not exist.")
