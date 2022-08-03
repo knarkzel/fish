@@ -12,3 +12,9 @@ nav {
   justify-content: center;
   grid-template-columns: repeat(3, minmax(100px, 250px));
 }
+
+#fish {
+    display: block;
+    margin: 0 auto;
+    max-width: 8em;
+}

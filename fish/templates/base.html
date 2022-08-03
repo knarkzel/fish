@@ -5,13 +5,16 @@
     <title>Fish visualizer</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.png">
     <link rel="stylesheet" href="/static/water.css">
-    <l ink rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+  <a href="/">
+    <img id=fish src="/static/favicon.png" alt="Fish">
+  </a>
   <nav>
     <ul>
       {% if session["username"]|length %}
-      <li><a href="#">{{ session["username"] }}</a></li>
+      <li><a href="/users/{{ session['username'] }}">{{ session["username"] }}</a></li>
       {% endif %}      
       <li><a href="/map">Map</a></li>
       {% if session["username"]|length %}

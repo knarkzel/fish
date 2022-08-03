@@ -70,7 +70,7 @@ def index():
     images = []
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep":
-            if image[file]["thumbnail"]:
+            if db["images"][file]["thumbnail"]:
                 images.append("/static/images/" + file)
     return render_template("index.html", images=images)
 
@@ -159,3 +159,11 @@ def map():
             extract_exif(path, file)
             folium.Marker(image[file]["pos"]).add_to(map)
     return render_template('map.html', map=map._repr_html_())
+
+@app.route("/users/<username>")
+def profile(username):
+    id = hash(username)
+    if id in db["users"]:
+        return render_template("profile.html", user=db["users"][id])
+    else:
+        return render_template("error.html", message="User does not exist.")
