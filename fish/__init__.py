@@ -59,7 +59,7 @@ def extract_exif(path, filename):
             new = [float(x) for x in new]
             new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
             pos.append(new)
-    image[filename] = {
+    db["images"][filename] = {
         "pos": pos,
         "date": datetime.now()
     }
