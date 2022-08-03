@@ -7,64 +7,28 @@ from datetime import datetime
 import hashlib
 from PIL import Image as PILImage
 import io
+import secrets
 
-app = Flask(__name__)
-app.secret_key = "good-secret_key"
-
-users = []
-class User:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-        self.id = base64.b64encode((username+password).encode("ascii"))
-    def __eq__(self, other):
-        return self.username == other.username
-
+users = {}
 image = {}
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User(username, password)
-        if user in users:
-            return user.id
-        else:
-            users.append(user)
-            session["user_name"] = user.username
-            session["user_id"] = user.id
-            return redirect("/")
-    else:
-        return render_template("register.html")
-    
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect("/")
+def hash(input):
+    return hashlib.sha256(input.encode("utf-8")).hexdigest()
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form['username']
-        password = request.form['password']
-        login = User(username, password)
-        for user in users:
-            if user.id == login.id:
-                session["user_name"] = user.username
-                session["user_id"] = user.id   
-                return redirect("/")
-        return "wrong"
-    else:
-        return render_template("login.html")
+def get_user(request):
+    username = request.form["username"]
+    password = request.form["password"]
+    return {
+        "id": hash(username),
+        "username": username,
+        "password": hash(password),
+    }
 
-@app.route('/')
-def index():
-    images = []
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep":
-            images.append("/static/images/" + file)
-    return render_template("index.html", images=images)
+def set_session(user):
+    session["id"] = user["id"]
+    session["username"] = user["username"]
 
 def extract_exif(path, filename):
     pos = []
@@ -81,6 +45,46 @@ def extract_exif(path, filename):
         "pos": pos,
         "date": datetime.now()
     }
+    
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        user = get_user(request)
+        id = user["id"]
+        if id in users:
+            return render_template("error.html", message="User already exists.")
+        else:
+            users[id] = user
+            set_session(user)
+            return redirect("/")
+    else:
+        return render_template("register.html")
+    
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = get_user(request)
+        id = user["id"]
+        if id in users and users[id]["password"] == user["password"]:
+            set_session(user)
+            return redirect("/")
+        else:
+            return render_template("error.html", message="Invalid username or password.")
+    else:
+        return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect("/")
+    
+@app.route('/')
+def index():
+    images = []
+    for file in os.listdir("./fish/static/images"):
+        if file != ".gitkeep":
+            images.append("/static/images/" + file)
+    return render_template("index.html", images=images)
 
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
@@ -91,10 +95,10 @@ def upload_file():
         hash = hashlib.sha256(bytes).hexdigest()
 
         # save as webp
-        name = hash + ".png"
+        name = hash + ".webp"
         path = os.path.join("./fish/static/images", name)
         image = PILImage.open(io.BytesIO(bytes))
-        image.save(path, format="png")
+        image.save(path, format="webp")
         return redirect("/")
     else:
         return render_template('upload.html')
