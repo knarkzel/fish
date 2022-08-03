@@ -1,15 +1,13 @@
+import io
 import os
-from flask import Flask, render_template, request, redirect, flash, session
-import base64
+import pickle
 import folium
+import secrets
+import hashlib
 from exif import Image
 from datetime import datetime
-import hashlib
 from PIL import Image as PILImage
-import io
-import tempfile
-import secrets
-import pickle
+from flask import Flask, render_template, request, redirect, flash, session
 
 # database
 db_path = "database.csv"
@@ -46,14 +44,6 @@ def get_user(request):
         "password": hash(password),
     }
 
-@app.route('/')
-def index():
-    images = []
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep":
-            if image[file]["thumbnail"]:
-                images.append("/static/images/" + file)
-    return render_template("index.html", images=images)
 def set_session(user):
     session["id"] = user["id"]
     session["username"] = user["username"]
@@ -75,6 +65,15 @@ def extract_exif(path, filename):
     }
 
 # routes
+@app.route('/')
+def index():
+    images = []
+    for file in os.listdir("./fish/static/images"):
+        if file != ".gitkeep":
+            if image[file]["thumbnail"]:
+                images.append("/static/images/" + file)
+    return render_template("index.html", images=images)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -108,15 +107,6 @@ def logout():
     session.clear()
     return redirect("/")
     
-@app.route('/')
-def index():
-    images = []
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep":
-            images.append("/static/images/" + file)
-    return render_template("index.html", images=images)
-
-
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
