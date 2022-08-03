@@ -7,6 +7,7 @@ from datetime import datetime
 import hashlib
 from PIL import Image as PILImage
 import io
+import tempfile
 
 app = Flask(__name__)
 app.secret_key = "good-secret_key"
@@ -63,7 +64,8 @@ def index():
     images = []
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep":
-            images.append("/static/images/" + file)
+            if image[file]["thumbnail"]:
+                images.append("/static/images/" + file)
     return render_template("index.html", images=images)
 
 def extract_exif(path, filename):
@@ -82,19 +84,47 @@ def extract_exif(path, filename):
         "date": datetime.now()
     }
 
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == "POST":
-        # hash
-        file = request.files["file"]
-        bytes = file.read()
-        hash = hashlib.sha256(bytes).hexdigest()
+        
 
-        # save as webp
-        name = hash + ".png"
+        file = request.files["file"]
+
+        name = "edit" + ".png"
         path = os.path.join("./fish/static/images", name)
-        image = PILImage.open(io.BytesIO(bytes))
-        image.save(path, format="png")
+        file.save(path)
+
+        # with open(path, "rb") as file:
+        #     bytes = hashlib.sha256(file.read(32)).hexdigest()
+        #     print(bytes) 
+        
+        img = PILImage.open(path)
+        w = img.size[0]
+        h = img.size[1]
+        if h > w:
+            length = w
+            rz_img = img.resize((w, int(h * (length / w)))) 
+            loss = (rz_img.size[1] - length)
+            thumb = rz_img.crop(
+                box = (0, loss / 2, length, h - loss / 2))
+        else:
+            length = h
+            rz_img = img.resize((int(w * (length / h)), length)) 
+            loss = (rz_img.size[0] - length)
+            thumb = rz_img.crop(
+                box = (loss / 2, 0, w - loss / 2, length))
+
+        name = "edit" + "THUMB" + ".png"
+        path = os.path.join("./fish/static/images", name)                
+        thumb.save(path)
+        image[name] = {
+            "thumbnail": True
+        }
+
+
+
         return redirect("/")
     else:
         return render_template('upload.html')
@@ -103,8 +133,8 @@ def upload_file():
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start=2)
     for file in os.listdir("./fish/static/images"):
-        path = os.path.join("./fish/static/images", file)
         if file != ".gitkeep":
+            path = os.path.join("./fish/static/images", file)
             extract_exif(path, file)
             folium.Marker(image[file]["pos"]).add_to(map)
     return render_template('map.html', map=map._repr_html_())
