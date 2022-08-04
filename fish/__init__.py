@@ -215,13 +215,21 @@ def map():
         simple.append(tmp2)
     print(simple)
 
-    for c in range(0,len(simple)):
-        for i in range(0,len(simple)):
-            # distance
-            x1 = simple[c][0]
-            y1 = simple[c][1]
-            x2 = simple[]
-            ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
+
+    # x1 = simple[0][0]
+    # y1 = simple[0][1]
+    # x2 = simple[1][0]
+    # y2 = simple[1][1]
+    # dist = ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
+    # print(dist)
+
+    # if len(simple) > 2:
+    #     for i in range(0,len(simple)):
+    #         z1 = simple []
+    #         z2 =
+    #         lol2 = 
+    #         dist = ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
+    #         if dist 
     
     map = folium.Map(location=center, zoom_start=3)
     for file in os.listdir(image_folder):
