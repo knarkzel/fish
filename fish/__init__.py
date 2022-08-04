@@ -1,5 +1,6 @@
 import io
 import os
+import numpy
 import base64
 import pickle
 import folium
@@ -70,17 +71,27 @@ def store_metadata(image, hash):
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
     date = datetime.now()
+    #position = ",".join([str(item) for item in pos])    
+    location = geolocator.reverse(pos)
+    address = location.raw["address"]
 
-    # username and exif
+    # username and exif + location
     info = {
         "username": session["username"],
         "pos": pos,
         "date": date,
+        "address": {
+            "city": address.get("city", ""),
+            "state": address.get("state", ""),
+            "country": address.get("country", "")
+        }
     }
     db["images"][hash + ".webp"] = info
     db["images"][hash + "-thumbnail.webp"] = info
+
     save_database(db)
-    
+
+
 def generate_thumbnail(img, hash):
     # thumbnail
     w = img.size[0]
@@ -123,19 +134,9 @@ def get_image(image):
     image = image.replace("-thumbnail", "")
     return image
 
-def get_location(image):
-    list = db["images"][image]["pos"]
-    position = ",".join([str(item) for item in list])
-    location = geolocator.reverse(position)
-    address = location.raw["address"]
-    return {
-        "city": address.get("city", ""),
-        "state": address.get("state", ""),
-        "country": address.get("country", ""),
-    }
-
 def get_username(image):
     return db["images"][image]["username"]
+
 
 # routes
 @app.route("/")
@@ -198,47 +199,18 @@ def upload_file():
 @app.route("/map") 
 def map():
     pos = []
-    xpos = []
-    ypos = []
     for file in os.listdir(image_folder):
         if file != ".gitkeep" and "thumbnail" not in file:  
             pos.append(db["images"][file]["pos"])
-    for loc in pos:
-        xpos.append(loc[0])
-        ypos.append(loc[1])
-    center = [sum(xpos)/len(xpos), sum(ypos)/len(xpos)]
-    
-    # remove decimals, probably dont need
-    simple = []
-    for y in range(0,len(pos)):
-        tmp2 = [int(x) for x in pos[y]]
-        simple.append(tmp2)
-    print(simple)
 
-
-    # x1 = simple[0][0]
-    # y1 = simple[0][1]
-    # x2 = simple[1][0]
-    # y2 = simple[1][1]
-    # dist = ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
-    # print(dist)
-
-    # if len(simple) > 2:
-    #     for i in range(0,len(simple)):
-    #         z1 = simple []
-    #         z2 =
-    #         lol2 = 
-    #         dist = ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
-    #         if dist 
-    
-    map = folium.Map(location=center, zoom_start=3)
-    for file in os.listdir(image_folder):
-        if file != ".gitkeep" and "thumbnail" not in file:   
-            folium.Marker(
-                db["images"][file]["pos"],
-                popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
-                + "<h1>" + db["images"][file]["username"] + ", " + str(db["images"][file]["pos"]) + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
-                ).add_to(map)        
+    map = folium.Map()#location=center, zoom_start=4)
+    map.fit_bounds(pos, padding=(50,50))
+    for image in os.listdir(image_folder):
+        if image != ".gitkeep" and "thumbnail" not in image:
+            position = db["images"][image]["pos"]
+            location = db["images"][image]["address"]
+            popup = render_template("popup.html", username=get_username(image), image=image, **location)
+            folium.Marker(position, popup).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
@@ -255,7 +227,7 @@ def view_image(image):
     if "thumbnail" in image:
         return redirect(f"/images/{get_image(image)}")
     if image in db["images"]:
-        return render_template("view_image.html", image=get_image(image), username=get_username(image), **get_location(image))
+        return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"])
     else:
         return render_template("error.html", message="Image does not exist.")
 
