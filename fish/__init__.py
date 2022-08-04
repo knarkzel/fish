@@ -1,5 +1,6 @@
 import io
 import os
+import base64
 import pickle
 import folium
 import secrets
@@ -113,6 +114,10 @@ def get_images(filter):
             images.append(file)
     return images
 
+def get_thumbnail(image):
+    image = image[0:image.index(".webp")] + "-thumbnail.webp"
+    return image
+
 # routes
 @app.route("/")
 def index():
@@ -171,14 +176,21 @@ def upload_file():
     else:
         return render_template("upload.html")
 
-@app.route("/map")
+
+
+
+@app.route("/map") 
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start=2)
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep" and "thumbnail" not in file:
+            pos = db["images"][file]["pos"]
+            xval = pos[0]   
+            yval = pos[1]
             folium.Marker(
-                db["images"][file]["pos"],
-                popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>" + file + "</a>"
+                pos,
+                popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
+                + "<img src=/static/images/" + get_thumbnail(file) + "></a>"
                 ).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
