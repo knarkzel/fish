@@ -219,13 +219,12 @@ def map():
         
     
     map = folium.Map(location=center, zoom_start=3)
-    for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep" and "thumbnail" not in file:   
-            folium.Marker(
-                db["images"][file]["pos"],
-                popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
-                + "<h1>" + db["images"][file]["username"] + ", " + str(db["images"][file]["pos"]) + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
-                ).add_to(map)        
+    for image in os.listdir(image_folder):
+        if image != ".gitkeep" and "thumbnail" not in image:
+            position = db["images"][image]["pos"]
+            location = get_location(image)
+            popup = render_template("popup.html", username=get_username(image), image=image, **location)
+            folium.Marker(position, popup).add_to(map)        
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
