@@ -1,6 +1,5 @@
 import io
 import os
-import numpy
 import base64
 import pickle
 import folium
@@ -10,8 +9,9 @@ import pathlib
 from exif import Image
 from datetime import datetime
 from PIL import Image as PILImage
-from flask import Flask, render_template, request, redirect, flash, session
 from geopy.geocoders import Nominatim
+from flask import Flask, render_template, request, redirect, flash, session
+
 
 # geopy
 geolocator = Nominatim(user_agent="fish_visualizer")
@@ -70,8 +70,7 @@ def store_metadata(image, hash):
         new = [float(x) for x in new]
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
-    date = datetime.now()
-    #position = ",".join([str(item) for item in pos])    
+    date = datetime.now() 
     location = geolocator.reverse(pos)
     address = location.raw["address"]
 
@@ -91,33 +90,33 @@ def store_metadata(image, hash):
 
     save_database(db)
 
-
 def generate_thumbnail(img, hash):
-    # thumbnail
     w = img.size[0]
     h = img.size[1]
+    print(w)
+    print(h)
     max_res = 500
     if h > w:
         if w > max_res:
             length = max_res
         else:
-            length = w
-            rz_img = img.resize((length, int(h * (length / w)))) 
-            loss = rz_img.size[1] - length
-            thumb = rz_img.crop(
-                box = (0, loss / 2, length, rz_img.size[1] - loss / 2))
+            length = h
+        rz_img = img.resize((length, int(h * (length / w)))) 
+        loss = rz_img.size[1] - length
+        thumb = rz_img.crop(
+            box = (0, loss / 2, length, rz_img.size[1] - loss / 2))
     else:
         if h > max_res:
             length = max_res
         else:
             length = h
-            rz_img = img.resize((int(w * (length / h)), length)) 
-            loss = rz_img.size[0] - length
-            thumb = rz_img.crop(
-                box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
-            name = hash + "-thumbnail.webp"
-            path = os.path.join("./fish/static/images", name)                
-            thumb.save(path)    
+        rz_img = img.resize((int(w * (length / h)), length)) 
+        loss = rz_img.size[0] - length
+        thumb = rz_img.crop(
+            box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
+        name = hash + "-thumbnail.webp"
+        path = os.path.join("./fish/static/images", name)                
+        thumb.save(path)    
 
 def get_images(filter):
     images = []
@@ -203,8 +202,8 @@ def map():
         if file != ".gitkeep" and "thumbnail" not in file:  
             pos.append(db["images"][file]["pos"])
 
-    map = folium.Map()#location=center, zoom_start=4)
-    map.fit_bounds(pos, padding=(50,50))
+    map = folium.Map()
+    map.fit_bounds(pos, padding=(100,100))
     for image in os.listdir(image_folder):
         if image != ".gitkeep" and "thumbnail" not in image:
             position = db["images"][image]["pos"]
@@ -230,4 +229,3 @@ def view_image(image):
         return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"])
     else:
         return render_template("error.html", message="Image does not exist.")
-
