@@ -1,9 +1,57 @@
 body {
-    margin: 0 auto;
+    margin: 0;
+    padding: 0;
 }
 
 nav {
-    font-size: 1.25em;
+    font-size: 1.5em;
+    margin-bottom: 1em;
+    background: #333;
+}
+
+nav > div {
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+nav > div > ul > li > a {
+    color: white;
+    text-align: center;
+    text-decoration: none;
+}
+
+nav > div > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #333;
+}
+
+nav > div > ul > li:first-of-type {
+    float: left;
+}
+
+nav > div > ul > :not(li:first-of-type) {
+    float: right;
+}
+
+nav > div > ul > li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+nav > div > ul > li a:hover {
+    text-decoration: none;
+    background: #111;
+}
+
+main {
+    margin: 0 auto;
+    max-width: 800px;
 }
 
 ul {
@@ -12,8 +60,8 @@ ul {
 
 #fish {
     display: block;
-    margin: 0 auto;
-    max-width: 8em;
+    margin: 1em auto;
+    max-width: 35em;
 }
 
 #images {
@@ -27,3 +75,15 @@ img {
     border-radius: 0.25em;
 }
 
+.button {
+    padding: 1em;
+    color: white;
+    background: #333;
+    text-decoration: none;
+    border-radius: 0.25em;
+}
+
+.button:hover {
+    background: #111;
+    text-decoration: none;
+}

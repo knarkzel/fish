@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if user["username"] == session["username"] %}
+<a class=button href="/logout">Logout</a>
+{% endif %}
 <h3>{{ user["username"] }}</h3>
 {% include 'images.html' %}
 {% endblock %}
