@@ -174,6 +174,12 @@ def upload_file():
 @app.route("/map")
 def map():
     map = folium.Map(location=[50.5, 8], zoom_start=2)
+    for file in os.listdir("./fish/static/images"):
+        if file != ".gitkeep" and "thumbnail" not in file:
+            folium.Marker(
+                db["images"][file]["pos"],
+                popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>" + file + "</a>"
+                ).add_to(map)
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
