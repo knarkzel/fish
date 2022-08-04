@@ -118,6 +118,10 @@ def get_thumbnail(image):
     image = image[0:image.index(".webp")] + "-thumbnail.webp"
     return image
 
+def get_image(image):
+    image = image.replace("-thumbnail", "")
+    return image
+
 # routes
 @app.route("/")
 def index():
@@ -178,21 +182,37 @@ def upload_file():
 
 
 
+# @app.route("/map") 
+# def map():
+#     map = folium.Map(location=[50.5, 8], zoom_start=2)
+#     for file in os.listdir("./fish/static/images"):
+#         if file != ".gitkeep" and "thumbnail" not in file:
+#             pos = db["images"][file]["pos"]
+#             xval = pos[0]   
+#             yval = pos[1]
+#             folium.Marker(
+#                 pos,
+#                 popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
+#                 + "<img src=/static/images/" + get_thumbnail(file) + "></a>"
+#                 ).add_to(map)
+#     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/map") 
 def map():
+    
+    #print(db["images"].values())
+           
     map = folium.Map(location=[50.5, 8], zoom_start=2)
     for file in os.listdir("./fish/static/images"):
-        if file != ".gitkeep" and "thumbnail" not in file:
-            pos = db["images"][file]["pos"]
-            xval = pos[0]   
-            yval = pos[1]
+        if file != ".gitkeep" and "thumbnail" not in file:   
             folium.Marker(
-                pos,
+                db["images"][file]["pos"],
                 popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
                 + "<img src=/static/images/" + get_thumbnail(file) + "></a>"
-                ).add_to(map)
+                ).add_to(map)             
     return render_template("map.html", map=map._repr_html_())
+
+
 
 @app.route("/users/<username>")
 def profile(username):
@@ -206,7 +226,7 @@ def profile(username):
 @app.route("/images/<image>")
 def view_image(image):
     if image in db["images"]:
-        return render_template("view_image.html", image=image)
+        return render_template("view_image.html", image=get_image(image))
     else:
         return render_template("error.html", message="Image does not exist.")
 
