@@ -48,7 +48,8 @@ def set_session(user):
     session["id"] = user["id"]
     session["username"] = user["username"]
 
-def store_exif(image, name):
+def store_metadata(image, hash):
+    # exif
     pos = []
     img = Image(image)
     for x in range(0, 2):
@@ -58,12 +59,21 @@ def store_exif(image, name):
         new = [float(x) for x in new]
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
-    db["images"][name] = {
+    date = datetime.now()
+
+    # username and exif
+    db["images"][hash + ".webp"] = {
+        "username": session["username"],
         "pos": pos,
-        "date": datetime.now()
+        "date": date,
+    }
+    db["images"][hash + "-thumbnail.webp"] = {
+        "username": session["username"],
+        "pos": pos,
+        "date": date,
     }
     save_database(db)
-
+    
 def generate_thumbnail(img, hash):
     # thumbnail
     w = img.size[0]
@@ -98,15 +108,6 @@ def get_images(filter):
         if file != ".gitkeep" and filter(file):
             images.append("/static/images/" + file)
     return images
-
-def store_metadata(hash):
-    db["images"][hash + ".webp"] = {
-        "username": session["username"],
-    }
-    db["images"][hash + "-thumbnail.webp"] = {
-        "username": session["username"],
-    }
-    save_database(db)
 
 # routes
 @app.route("/")
@@ -157,12 +158,11 @@ def upload_file():
         
         # save as webp
         name = hash + ".webp"
-        store_exif(bytes, name)
         path = os.path.join("./fish/static/images", name)
         image = PILImage.open(io.BytesIO(bytes))
         image.save(path, format="webp")
         generate_thumbnail(image, hash)
-        store_metadata(hash)
+        store_metadata(bytes, hash)
         return redirect("/")
     else:
         return render_template("upload.html")
