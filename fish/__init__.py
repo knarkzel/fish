@@ -110,7 +110,7 @@ def get_images(filter):
     images = []
     for file in os.listdir(image_folder):
         if file != ".gitkeep" and filter(file):
-            images.append("/static/images/" + file)
+            images.append(file)
     return images
 
 # routes
@@ -184,3 +184,11 @@ def profile(username):
         return render_template("profile.html", user=db["users"][id], images=images)
     else:
         return render_template("error.html", message="User does not exist.")
+
+@app.route("/images/<image>")
+def view_image(image):
+    if image in db["images"]:
+        return render_template("view_image.html", image=image)
+    else:
+        return render_template("error.html", message="Image does not exist.")
+

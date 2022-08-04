@@ -1,7 +1,9 @@
 {% if images|length %}
 <div id=images>
   {% for image in images %}
-  <img src="{{ image }}">
+  <a href="/images/{{ image }}">
+    <img src="/static/images/{{ image }}">
+  </a>
   {% endfor %}
 </div>
 {% else %}

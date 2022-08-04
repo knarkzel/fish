@@ -10,15 +10,20 @@ ul {
     margin-top: 0;
 }
 
-#images {
-  display: grid;
-  grid-gap: 0.5em;
-  justify-content: center;
-  grid-template-columns: repeat(3, minmax(100px, 250px));
-}
-
 #fish {
     display: block;
     margin: 0 auto;
     max-width: 8em;
 }
+
+#images {
+    display: grid;
+    grid-gap: 0.5em;
+    grid-template-columns: repeat(3, minmax(100px, 250px));
+}
+
+img {
+    width: 100%;
+    border-radius: 0.25em;
+}
+
