@@ -189,7 +189,7 @@ def map():
     pos = []
     xpos = []
     ypos = []
-    for file in os.listdir("./fish/static/images"):
+    for file in os.listdir(image_folder):
         if file != ".gitkeep" and "thumbnail" not in file:  
             pos.append(db["images"][file]["pos"])
     for loc in pos:
@@ -204,11 +204,16 @@ def map():
         simple.append(tmp2)
     print(simple)
 
-    #for len in range(0,len(simple)):
-        
+    for c in range(0,len(simple)):
+        for i in range(0,len(simple)):
+            # distance
+            x1 = simple[c][0]
+            y1 = simple[c][1]
+            x2 = simple[]
+            ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5)
     
     map = folium.Map(location=center, zoom_start=3)
-    for file in os.listdir("./fish/static/images"):
+    for file in os.listdir(image_folder):
         if file != ".gitkeep" and "thumbnail" not in file:   
             folium.Marker(
                 db["images"][file]["pos"],
