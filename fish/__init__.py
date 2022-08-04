@@ -225,6 +225,8 @@ def profile(username):
 
 @app.route("/images/<image>")
 def view_image(image):
+    if "thumbnail" in image:
+        return redirect(f"/images/{get_image(image)}")
     if image in db["images"]:
         return render_template("view_image.html", image=get_image(image))
     else:
