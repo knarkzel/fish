@@ -197,14 +197,35 @@ def upload_file():
 
 @app.route("/map") 
 def map():
-    map = folium.Map(location=[50.5, 8], zoom_start=2)
+    pos = []
+    xpos = []
+    ypos = []
+    for file in os.listdir(image_folder):
+        if file != ".gitkeep" and "thumbnail" not in file:  
+            pos.append(db["images"][file]["pos"])
+    for loc in pos:
+        xpos.append(loc[0])
+        ypos.append(loc[1])
+    center = [sum(xpos)/len(xpos), sum(ypos)/len(xpos)]
+    
+    # remove decimals, probably dont need
+    simple = []
+    for y in range(0,len(pos)):
+        tmp2 = [int(x) for x in pos[y]]
+        simple.append(tmp2)
+    print(simple)
+
+    #for len in range(0,len(simple)):
+        
+    
+    map = folium.Map(location=center, zoom_start=3)
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep" and "thumbnail" not in file:   
             folium.Marker(
                 db["images"][file]["pos"],
                 popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
-                + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
-                ).add_to(map)             
+                + "<h1>" + db["images"][file]["username"] + ", " + str(db["images"][file]["pos"]) + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
+                ).add_to(map)        
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
