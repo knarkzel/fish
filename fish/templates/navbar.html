@@ -1,9 +1,10 @@
 <nav>
   <div>
     <ul>
-      <li><a href="/">Fish visualizer</a></li>
+      <li class=bold><a href="/">Fish visualizer</a></li>
       {% if session["username"]|length %}
       <li><a href="/users/{{ session['username'] }}">{{ session["username"] }}</a></li>
+      <li><a href="/logout">Logout</a></li>
       <li><a href="/upload">Upload</a></li>
       <li><a href="/map">Map</a></li>
       {% else %}

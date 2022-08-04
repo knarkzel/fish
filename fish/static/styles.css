@@ -1,3 +1,10 @@
+:root {
+    --fg-color: black;
+    --fg-color-hover: white;
+    --bg-color: white;
+    --bg-color-hover: #f4f4f4;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -6,7 +13,7 @@ body {
 nav {
     font-size: 1.5em;
     margin-bottom: 1em;
-    background: #333;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
 }
 
 nav > div {
@@ -15,7 +22,7 @@ nav > div {
 }
 
 nav > div > ul > li > a {
-    color: white;
+    color: var(--fg-color);
     text-align: center;
     text-decoration: none;
 }
@@ -25,7 +32,7 @@ nav > div > ul {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: #333;
+    background: var(--bg-color);
 }
 
 nav > div > ul > li:first-of-type {
@@ -38,7 +45,7 @@ nav > div > ul > :not(li:first-of-type) {
 
 nav > div > ul > li a {
     display: block;
-    color: white;
+    color: var(--fg-color);
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -46,7 +53,7 @@ nav > div > ul > li a {
 
 nav > div > ul > li a:hover {
     text-decoration: none;
-    background: #111;
+    background: var(--bg-color-hover);
 }
 
 main {
@@ -73,17 +80,4 @@ ul {
 img {
     width: 100%;
     border-radius: 0.25em;
-}
-
-.button {
-    padding: 1em;
-    color: white;
-    background: #333;
-    text-decoration: none;
-    border-radius: 0.25em;
-}
-
-.button:hover {
-    background: #111;
-    text-decoration: none;
 }
