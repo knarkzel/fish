@@ -10,7 +10,12 @@ from exif import Image
 from datetime import datetime
 from PIL import Image as PILImage
 from flask import Flask, render_template, request, redirect, flash, session
+from geopy.geocoders import Nominatim
 
+# geopy
+geolocator = Nominatim(user_agent="fish_visualizer")
+
+# folders
 root_folder = pathlib.Path(__file__).parent.resolve()
 image_folder = os.path.join(root_folder, "static/images")
 
@@ -67,16 +72,13 @@ def store_metadata(image, hash):
     date = datetime.now()
 
     # username and exif
-    db["images"][hash + ".webp"] = {
+    info = {
         "username": session["username"],
         "pos": pos,
         "date": date,
     }
-    db["images"][hash + "-thumbnail.webp"] = {
-        "username": session["username"],
-        "pos": pos,
-        "date": date,
-    }
+    db["images"][hash + ".webp"] = info
+    db["images"][hash + "-thumbnail.webp"] = info
     save_database(db)
     
 def generate_thumbnail(img, hash):
@@ -102,7 +104,6 @@ def generate_thumbnail(img, hash):
             loss = rz_img.size[0] - length
             thumb = rz_img.crop(
                 box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
-            
             name = hash + "-thumbnail.webp"
             path = os.path.join("./fish/static/images", name)                
             thumb.save(path)    
@@ -121,6 +122,20 @@ def get_thumbnail(image):
 def get_image(image):
     image = image.replace("-thumbnail", "")
     return image
+
+def get_location(image):
+    list = db["images"][image]["pos"]
+    position = ",".join([str(item) for item in list])
+    location = geolocator.reverse(position)
+    address = location.raw["address"]
+    return {
+        "city": address.get("city", ""),
+        "state": address.get("state", ""),
+        "country": address.get("country", ""),
+    }
+
+def get_username(image):
+    return db["images"][image]["username"]
 
 # routes
 @app.route("/")
@@ -180,28 +195,8 @@ def upload_file():
     else:
         return render_template("upload.html")
 
-
-
-# @app.route("/map") 
-# def map():
-#     map = folium.Map(location=[50.5, 8], zoom_start=2)
-#     for file in os.listdir("./fish/static/images"):
-#         if file != ".gitkeep" and "thumbnail" not in file:
-#             pos = db["images"][file]["pos"]
-#             xval = pos[0]   
-#             yval = pos[1]
-#             folium.Marker(
-#                 pos,
-#                 popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
-#                 + "<img src=/static/images/" + get_thumbnail(file) + "></a>"
-#                 ).add_to(map)
-#     return render_template("map.html", map=map._repr_html_())
-
 @app.route("/map") 
 def map():
-    
-    #print(db["images"].values())
-           
     map = folium.Map(location=[50.5, 8], zoom_start=2)
     for file in os.listdir("./fish/static/images"):
         if file != ".gitkeep" and "thumbnail" not in file:   
@@ -211,8 +206,6 @@ def map():
                 + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
                 ).add_to(map)             
     return render_template("map.html", map=map._repr_html_())
-
-
 
 @app.route("/users/<username>")
 def profile(username):
@@ -228,7 +221,7 @@ def view_image(image):
     if "thumbnail" in image:
         return redirect(f"/images/{get_image(image)}")
     if image in db["images"]:
-        return render_template("view_image.html", image=get_image(image))
+        return render_template("view_image.html", image=get_image(image), username=get_username(image), **get_location(image))
     else:
         return render_template("error.html", message="Image does not exist.")
 
