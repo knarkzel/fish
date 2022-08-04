@@ -208,7 +208,7 @@ def map():
             folium.Marker(
                 db["images"][file]["pos"],
                 popup = "<a href='/users/" + db["images"][file]["username"] + "' target='_blank'>"
-                + "<img src=/static/images/" + get_thumbnail(file) + "></a>"
+                + "<img src=/static/images/" + get_thumbnail(file) + " width=250 height=250></a>"
                 ).add_to(map)             
     return render_template("map.html", map=map._repr_html_())
 
