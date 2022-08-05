@@ -2,11 +2,11 @@
 with python3Packages;
   buildPythonPackage {
     name = "fish";
-    src = ./fish;
+    src = ./src;
 
     format = "other";
     shellHook = ''
-    export FLASK_APP=fish
+    export FLASK_APP=src
     export FLASK_ENV=development
     '';
     propagatedBuildInputs = [flask exif folium pillow geopy];

@@ -114,7 +114,7 @@ def generate_thumbnail(img, hash):
         thumb = rz_img.crop(
             box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
         name = hash + "-thumbnail.webp"
-        path = os.path.join("./fish/static/images", name)                
+        path = os.path.join(image_folder, name)                
         thumb.save(path)    
 
 def get_images(filter):
@@ -195,7 +195,7 @@ def upload_file():
         
         # save as webp
         name = hash + ".webp"
-        path = os.path.join("./fish/static/images", name)
+        path = os.path.join(image_folder, name)
         image = PILImage.open(io.BytesIO(bytes))
         image.save(path, format="webp")
         generate_thumbnail(image, hash)

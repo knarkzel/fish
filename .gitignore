@@ -2,3 +2,5 @@ result
 __pycache__
 database.csv
 *.webp
+.envrc
+.direnv
