@@ -70,9 +70,10 @@ def store_metadata(image, hash):
         new = [float(x) for x in new]
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
-    date = datetime.now() 
-    location = geolocator.reverse(pos)
+    date = datetime.now()
+    location = geolocator.reverse(pos, language="en")
     address = location.raw["address"]
+    print(address)
 
     # username and exif + location
     info = {
@@ -93,8 +94,6 @@ def store_metadata(image, hash):
 def generate_thumbnail(img, hash):
     w = img.size[0]
     h = img.size[1]
-    print(w)
-    print(h)
     max_res = 500
     if h > w:
         if w > max_res:
@@ -136,12 +135,22 @@ def get_image(image):
 def get_username(image):
     return db["images"][image]["username"]
 
+def sort_date(images):
+    sort = []
+    for name in images:
+        sort.append([name, db["images"][name]["date"]])
+    sort = sorted(sort, key = lambda x: x[1], reverse = True) # sorts by newest
+    out = []
+    for x in sort:
+        out.append(str(x[0]))
+    return out
+    
 
 # routes
 @app.route("/")
 def index():
     images = get_images(lambda file: "thumbnail" in file)
-    return render_template("index.html", images=images)
+    return render_template("index.html", images=sort_date(images))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -202,7 +211,7 @@ def map():
         if file != ".gitkeep" and "thumbnail" not in file:  
             pos.append(db["images"][file]["pos"])
 
-    map = folium.Map()
+    map = folium.Map(attributionControl=False)
     map.fit_bounds(pos, padding=(100,100))
     for image in os.listdir(image_folder):
         if image != ".gitkeep" and "thumbnail" not in image:
@@ -210,6 +219,7 @@ def map():
             location = db["images"][image]["address"]
             popup = render_template("popup.html", username=get_username(image), image=image, **location)
             folium.Marker(position, popup).add_to(map)
+
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
@@ -217,6 +227,7 @@ def profile(username):
     id = hash(username)
     if id in db["users"]:
         images = get_images(lambda file: db["images"][file]["username"] == username and "thumbnail" in file)
+        images = sort_date(images)
         return render_template("profile.html", user=db["users"][id], images=images)
     else:
         return render_template("error.html", message="User does not exist.")
