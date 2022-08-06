@@ -113,9 +113,9 @@ def generate_thumbnail(img, hash):
         loss = rz_img.size[0] - length
         thumb = rz_img.crop(
             box = (loss / 2, 0, rz_img.size[0] - loss / 2, length))
-        name = hash + "-thumbnail.webp"
-        path = os.path.join(image_folder, name)                
-        thumb.save(path)    
+    name = hash + "-thumbnail.webp"
+    path = os.path.join(image_folder, name)                
+    thumb.save(path)    
 
 def get_images(filter):
     images = []
@@ -145,6 +145,22 @@ def sort_date(images):
         out.append(str(x[0]))
     return out
     
+def draw_map(filter):
+    pos = []
+    for file in os.listdir(image_folder):
+        if file != ".gitkeep" and filter(file):  
+            pos.append(db["images"][file]["pos"])
+    print(pos)
+    map = folium.Map(attributionControl=False, max_bounds=True, zoomSnap=0.1)
+    for file in os.listdir(image_folder):
+        if file != ".gitkeep" and filter(file):
+            position = db["images"][file]["pos"]
+            location = db["images"][file]["address"]
+            popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), **location)
+            folium.Marker(position, popup).add_to(map)
+    map.fit_bounds(pos, padding=(200,200), max_zoom=14)
+    return map
+
 
 # routes
 @app.route("/")
@@ -206,20 +222,7 @@ def upload_file():
 
 @app.route("/map") 
 def map():
-    pos = []
-    for file in os.listdir(image_folder):
-        if file != ".gitkeep" and "thumbnail" not in file:  
-            pos.append(db["images"][file]["pos"])
-
-    map = folium.Map(attributionControl=False)
-    map.fit_bounds(pos, padding=(100,100))
-    for image in os.listdir(image_folder):
-        if image != ".gitkeep" and "thumbnail" not in image:
-            position = db["images"][image]["pos"]
-            location = db["images"][image]["address"]
-            popup = render_template("popup.html", username=get_username(image), image=image, **location)
-            folium.Marker(position, popup).add_to(map)
-
+    map = draw_map(lambda file: "thumbnail" not in file)
     return render_template("map.html", map=map._repr_html_())
 
 @app.route("/users/<username>")
@@ -228,7 +231,7 @@ def profile(username):
     if id in db["users"]:
         images = get_images(lambda file: db["images"][file]["username"] == username and "thumbnail" in file)
         images = sort_date(images)
-        return render_template("profile.html", user=db["users"][id], images=images)
+        return render_template("profile.html", user=db["users"][id], images=images, username=username)
     else:
         return render_template("error.html", message="User does not exist.")
 
@@ -240,3 +243,13 @@ def view_image(image):
         return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"])
     else:
         return render_template("error.html", message="Image does not exist.")
+
+@app.route("/map/<image>")
+def map_image(image):
+    map = draw_map(lambda file: str(image) in file)
+    return render_template("map.html", map=map._repr_html_())
+
+@app.route("/users/<username>/map")
+def map_user(username):
+    map = draw_map(lambda file: db["images"][file]["username"] == username)
+    return render_template("map.html", map=map._repr_html_())

@@ -2,7 +2,8 @@
 
 {% block content %}
 
-<h2>{{ username }}</h2>
+<a href="/users/{{ username }}"><h2>{{ username }}</h2></a>
+<a href="/map/{{ image }}"><h3>VIEW ON MAP</h3></a>
 <p>{% include 'location.html' %}</p>
 <img src="/static/images/{{ image }}">
 

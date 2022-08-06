@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>{{ user["username"] }}</h2>
+<h2>{{ username }}</h2>
+<a href="{{ username }}/map"><h3>SHOW IMAGES ON MAP</h3></a>
 {% include 'images.html' %}
 {% endblock %}
