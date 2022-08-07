@@ -80,3 +80,29 @@ img {
 input[type=submit] {
     margin-top: 0.5em;
 }
+
+#view_image {
+    width: 50%;
+    display: block;
+    margin: 0 auto;
+}
+
+#view_image > img {
+    margin-top: 1.1em;
+}
+
+.button {
+    color: white;
+    padding: 1em;
+    font-weight: bold;
+    margin: 1em 0;
+    border-radius: 0.5em;
+    background-color: #222;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.button:hover {
+    text-decoration: none;
+    background-color: #333;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
+}
