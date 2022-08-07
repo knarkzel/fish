@@ -82,12 +82,8 @@ input[type=submit] {
 }
 
 #view_image {
-    width: 50%;
     display: block;
-    margin: 0 auto;
-}
-
-#view_image > img {
+    max-width: 50%;
     margin-top: 1.1em;
 }
 
@@ -104,5 +100,4 @@ input[type=submit] {
 .button:hover {
     text-decoration: none;
     background-color: #333;
-    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.15);
 }

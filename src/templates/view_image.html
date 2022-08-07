@@ -2,11 +2,9 @@
 
 {% block content %}
 
-<div id=view_image>
-  <a href="/users/{{ username }}"><h2>{{ username }}</h2></a>
-  <p>{% include 'location.html' %}</p>
-  <a class=button href="/map/{{ image }}">Location</a>
-  <img src="/static/images/{{ image }}">
-</div>
+<a href="/users/{{ username }}"><h2>{{ username }}</h2></a>
+<p>{% include 'location.html' %}</p>
+<a class=button href="/map/{{ image }}">Location</a>
+<img id=view_image src="/static/images/{{ image }}">
 
 {% endblock %}
