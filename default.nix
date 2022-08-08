@@ -11,7 +11,7 @@ with python3Packages;
     alias run="pgrep python | xargs kill -9 2>/dev/null
 python -m flask run"
     '';
-    propagatedBuildInputs = [flask exif folium pillow geopy];
+    propagatedBuildInputs = [flask exif folium pillow geopy sqlitedict];
 
     installPhase = ''
       runHook preInstall
