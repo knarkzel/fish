@@ -2,6 +2,6 @@
 
 {% block content %}
 <h2>{{ username }}</h2>
-<a href="{{ username }}/map"><h3>SHOW IMAGES ON MAP</h3></a>
+<a class=boxed href="/map/users/{{ username }}">Locations</a>
 {% include 'images.html' %}
 {% endblock %}

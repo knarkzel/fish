@@ -12,7 +12,6 @@ from PIL import Image as PILImage
 from geopy.geocoders import Nominatim
 from flask import Flask, render_template, request, redirect, flash, session
 
-
 # geopy
 geolocator = Nominatim(user_agent="fish_visualizer")
 
@@ -161,7 +160,6 @@ def draw_map(filter):
     map.fit_bounds(pos, padding=(200,200), max_zoom=14)
     return map
 
-
 # routes
 @app.route("/")
 def index():
@@ -220,11 +218,6 @@ def upload_file():
     else:
         return render_template("upload.html")
 
-@app.route("/map") 
-def map():
-    map = draw_map(lambda file: "thumbnail" not in file)
-    return render_template("map.html", map=map._repr_html_())
-
 @app.route("/users/<username>")
 def profile(username):
     id = hash(username)
@@ -244,12 +237,18 @@ def view_image(image):
     else:
         return render_template("error.html", message="Image does not exist.")
 
-@app.route("/map/<image>")
+# map
+@app.route("/map") 
+def map():
+    map = draw_map(lambda file: "thumbnail" not in file)
+    return render_template("map.html", map=map._repr_html_())
+    
+@app.route("/map/images/<image>")
 def map_image(image):
     map = draw_map(lambda file: str(image) in file)
     return render_template("map.html", map=map._repr_html_())
 
-@app.route("/users/<username>/map")
+@app.route("/map/users/<username>")
 def map_user(username):
     map = draw_map(lambda file: db["images"][file]["username"] == username)
     return render_template("map.html", map=map._repr_html_())
