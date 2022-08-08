@@ -81,6 +81,7 @@ def store_metadata(image, hash):
     }
     db["images"][hash + ".webp"] = info
     db["images"][hash + "-thumbnail.webp"] = info
+    db["comments"][hash + ".webp"] = []
     save_database(db)
 
 def generate_thumbnail(img, hash):
@@ -236,7 +237,7 @@ def view_image(image):
     print(db["comments"])
     if request.method == "POST":
         comment = request.form["comment"]
-        db["comments"][image] = [{ "content": comment }]
+        db["comments"][image].append({ "content": comment })
         save_database(db)
         return redirect("/images/" + image)
     else:
