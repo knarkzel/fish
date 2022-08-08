@@ -1,6 +1,7 @@
 result
 __pycache__
 database.csv
+database.sqlite
 *.webp
 .envrc
 .direnv

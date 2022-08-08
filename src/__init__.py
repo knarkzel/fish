@@ -8,6 +8,7 @@ import hashlib
 import pathlib
 from exif import Image
 from datetime import datetime
+from sqlitedict import SqliteDict
 from PIL import Image as PILImage
 from geopy.geocoders import Nominatim
 from flask import Flask, render_template, request, redirect, flash, session
@@ -20,24 +21,14 @@ root_folder = pathlib.Path(__file__).parent.resolve()
 image_folder = os.path.join(root_folder, "static/images")
 
 # database
-db_path = "database.csv"
-
-def load_database():
-    if os.path.exists(db_path):
-        with open(db_path, "rb") as file:
-            return pickle.load(file)
-    else:
-        return {
-            "users": {},
-            "images": {},
-        }
-
-def save_database(db):
-    with open(db_path, "wb") as file:
-        pickle.dump(db, file)
+db_path = "database.sqlite"
+exists = os.path.exists(db_path)
+db = SqliteDict("database.sqlite")
+if not exists:
+    db["users"] = {}
+    db["images"] = {}
 
 # flask
-db = load_database()
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
@@ -72,7 +63,6 @@ def store_metadata(image, hash):
     date = datetime.now()
     location = geolocator.reverse(pos, language="en")
     address = location.raw["address"]
-    print(address)
 
     # username and exif + location
     info = {
@@ -86,10 +76,11 @@ def store_metadata(image, hash):
             "country": address.get("country", "")
         }
     }
-    db["images"][hash + ".webp"] = info
-    db["images"][hash + "-thumbnail.webp"] = info
-
-    save_database(db)
+    images = db["images"]
+    images[hash + ".webp"] = info
+    images[hash + "-thumbnail.webp"] = info
+    db["images"] = images
+    db.commit()
 
 def generate_thumbnail(img, hash):
     w = img.size[0]
@@ -177,8 +168,10 @@ def register():
         if id in db["users"]:
             return render_template("error.html", message="User already exists.")
         else:
-            db["users"][id] = user
-            save_database(db)
+            users = db["users"]
+            users[id] = user
+            db["users"] = users
+            db.commit()
             set_session(user)
             return redirect("/")
     else:
