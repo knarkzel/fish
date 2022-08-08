@@ -77,6 +77,7 @@ def store_metadata(image, hash):
     # username and exif + location
     info = {
         "username": session["username"],
+        "id": session["id"],
         "pos": pos,
         "date": date,
         "address": {
@@ -135,6 +136,9 @@ def get_image(image):
 
 def get_username(image):
     return db["images"][image]["username"]
+
+def get_userid(image):
+    return db["images"][image]["id"]
 
 def sort_date(images):
     sort = []
@@ -232,7 +236,7 @@ def view_image(image):
     if "thumbnail" in image:
         return redirect(f"/images/{get_image(image)}")
     if image in db["images"]:
-        return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"])
+        return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"], userid=get_userid(image))
     else:
         return render_template("error.html", message="Image does not exist.")
 
@@ -251,3 +255,15 @@ def map_image(image):
 def map_user(username):
     map = draw_map(lambda file: db["images"][file]["username"] == username)
     return render_template("map.html", map=map._repr_html_())
+
+
+@app.route("/images/delete/<image>")
+def delete_image(image):
+    print(get_userid(image))
+    print(session["id"])
+    if session["id"] == get_userid(image):
+        os.remove(image_folder + "/" + image)
+        os.remove(image_folder + "/" + get_thumbnail(image))
+        return redirect("/users/"+get_username(image))
+    else:
+        return render_template("error.html", message="No access.")

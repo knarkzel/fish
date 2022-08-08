@@ -2,6 +2,8 @@
 
 {% block content %}
 <h2>{{ username }}</h2>
+{% if images|length %}
 <a class=boxed href="/map/users/{{ username }}">Locations</a>
+{% endif %}
 {% include 'images.html' %}
 {% endblock %}
