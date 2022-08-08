@@ -102,6 +102,7 @@ def generate_thumbnail(img, hash):
     path = os.path.join(image_folder, name)                
     thumb.save(path)    
 
+
 def get_images(filter):
     images = []
     for file in os.listdir(image_folder):
@@ -127,6 +128,9 @@ def get_userid(image):
 
 def get_location(image):
     return db["images"][image]["location"]
+
+def get_comments(image):
+    return db["images"][image]["comments"]
 
 def sort_date(images):
     sort = []
@@ -222,14 +226,32 @@ def profile(username):
     else:
         return render_template("error.html", message="User does not exist.")
 
-@app.route("/images/<image>")
+@app.route("/images/<image>", methods=["GET", "POST"])
 def view_image(image):
-    if "thumbnail" in image:
-        return redirect(f"/images/{get_image(image)}")
-    if image in db["images"]:
-        return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image))
+    # comment
+    if request.method == "POST":
+        commentid = len(db["images"][image]["comments"])+1
+        content = request.form
+        savedict = {
+            "user": session["username"],
+            "id": session["id"],
+            "content": content["content"]
+        }
+
+        # save db
+        addcomments = db["images"]
+        addcomments["comments"] = savedict
+        db["images"][image] = addcomments
+        db.commit()
+
+        return redirect("/images/" + image)
     else:
-        return render_template("error.html", message="Image does not exist.")
+        if "thumbnail" in image:
+            return redirect(f"/images/{get_image(image)}")
+        if image in db["images"]:
+            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments="bruh")
+        else:
+            return render_template("error.html", message="Image does not exist.")
 
 # map
 @app.route("/map") 
