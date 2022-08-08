@@ -1,0 +1,21 @@
+{% block content %}
+
+<form method="POST">
+    <p>Add comment:<input type = "text" name = "content" /></p>
+    <p><input type = "submit" value = "Submit" /></p>
+</form>
+
+
+<h3>COMMENTS</h3>
+
+{% if comments|length %}
+  {% for comment in comments %}
+    <h1>{{ comment }}</h1>
+  {% endfor %}
+{% endif %}
+
+
+
+
+
+{% endblock %}
