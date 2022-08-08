@@ -25,11 +25,10 @@ db_path = "database.sqlite"
 exists = os.path.exists(db_path)
 db = SqliteDict("database.sqlite")
 if not exists:
-    db["images"] = {}
-    db.commit()
     db["users"] = {}
     db.commit()
-
+    db["images"] = {}
+    db.commit()
 
 # flask
 app = Flask(__name__)
