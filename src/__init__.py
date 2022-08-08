@@ -147,18 +147,16 @@ def sort_date(images):
     return out
     
 def draw_map(filter):
-    pos = []
-    for file in os.listdir(image_folder):
-        if file != ".gitkeep" and filter(file):
-            pos.append(db["images"][file]["pos"])
+    bounds = []
     map = folium.Map(attributionControl=False, max_bounds=True, zoomSnap=0.1)
     for file in os.listdir(image_folder):
         if file != ".gitkeep" and filter(file):
+            bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
             location = db["images"][file]["address"]
             popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), **location)
             folium.Marker(position, popup).add_to(map)
-    map.fit_bounds(pos, padding=(200,200), max_zoom=14)
+    map.fit_bounds(bounds, padding=(200,200), max_zoom=14)
     return map
 
 # routes
@@ -251,5 +249,5 @@ def map_image(image):
 
 @app.route("/map/users/<username>")
 def map_user(username):
-    map = draw_map(lambda file: db["images"][file]["username"] == username and "thumbnail" in file)
+    map = draw_map(lambda file: db["images"][file]["username"] == username)
     return render_template("map.html", map=map._repr_html_())
