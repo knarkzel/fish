@@ -124,8 +124,10 @@ def get_images(filter):
     return images
 
 def get_thumbnail(image):
-    image = image[0:image.index(".webp")] + "-thumbnail.webp"
-    return image
+    if "thumbnail" in image:
+        return image
+    else:
+        return image[0:image.index(".webp")] + "-thumbnail.webp"
 
 def get_image(image):
     image = image.replace("-thumbnail", "")
@@ -147,9 +149,8 @@ def sort_date(images):
 def draw_map(filter):
     pos = []
     for file in os.listdir(image_folder):
-        if file != ".gitkeep" and filter(file):  
+        if file != ".gitkeep" and filter(file):
             pos.append(db["images"][file]["pos"])
-    print(pos)
     map = folium.Map(attributionControl=False, max_bounds=True, zoomSnap=0.1)
     for file in os.listdir(image_folder):
         if file != ".gitkeep" and filter(file):
@@ -250,5 +251,5 @@ def map_image(image):
 
 @app.route("/map/users/<username>")
 def map_user(username):
-    map = draw_map(lambda file: db["images"][file]["username"] == username)
+    map = draw_map(lambda file: db["images"][file]["username"] == username and "thumbnail" in file)
     return render_template("map.html", map=map._repr_html_())
