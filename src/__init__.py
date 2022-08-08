@@ -26,6 +26,8 @@ if not exists:
     db.commit()
     db["images"] = {}
     db.commit()
+    db["comments"] = {}
+    db.commit()
 
 # flask
 app = Flask(__name__)
@@ -74,6 +76,12 @@ def store_metadata(image, hash):
     images[hash + ".webp"] = info
     images[hash + "-thumbnail.webp"] = info
     db["images"] = images
+    db.commit()
+
+    # comments
+    comments = db["comments"]
+    comments[image] = []
+    db["comments"] = comments
     db.commit()
 
 def generate_thumbnail(img, hash):
@@ -130,7 +138,7 @@ def get_location(image):
     return db["images"][image]["location"]
 
 def get_comments(image):
-    return db["images"][image]["comments"]
+    return db["comments"][image]
 
 def sort_date(images):
     sort = []
@@ -228,28 +236,19 @@ def profile(username):
 
 @app.route("/images/<image>", methods=["GET", "POST"])
 def view_image(image):
-    # comment
     if request.method == "POST":
-        commentid = len(db["images"][image]["comments"])+1
-        content = request.form
-        savedict = {
-            "user": session["username"],
-            "id": session["id"],
-            "content": content["content"]
-        }
-
-        # save db
-        addcomments = db["images"]
-        addcomments["comments"] = savedict
-        db["images"][image] = addcomments
+        comment = request.form["comment"]
+        comments = db["comments"]
+        comments[image] = [{ "content": comment }]
+        db["comments"] = comments
         db.commit()
-
+        print(db["comments"][image])
         return redirect("/images/" + image)
     else:
         if "thumbnail" in image:
             return redirect(f"/images/{get_image(image)}")
         if image in db["images"]:
-            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments="bruh")
+            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments=get_comments(image))
         else:
             return render_template("error.html", message="Image does not exist.")
 
@@ -269,8 +268,8 @@ def map_user(username):
     map = draw_map(lambda file: db["images"][file]["username"] == username)
     return render_template("map.html", map=map._repr_html_())
 
-
-@app.route("/images/delete/<image>")
+# delete
+@app.route("/delete/images/<image>")
 def delete_image(image):
     print(get_userid(image))
     print(session["id"])
