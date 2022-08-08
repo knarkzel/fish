@@ -6,15 +6,12 @@ import folium
 import secrets
 import hashlib
 import pathlib
+import requests
 from exif import Image
 from datetime import datetime
 from sqlitedict import SqliteDict
 from PIL import Image as PILImage
-from geopy.geocoders import Nominatim
 from flask import Flask, render_template, request, redirect, flash, session
-
-# geopy
-geolocator = Nominatim(user_agent="fish_visualizer")
 
 # folders
 root_folder = pathlib.Path(__file__).parent.resolve()
@@ -63,20 +60,15 @@ def store_metadata(image, hash):
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
     date = datetime.now()
-    location = geolocator.reverse(pos, language="en")
-    address = location.raw["address"]
-
+    location = requests.get(f"http://0.0.0.0:8080/{pos[0]}/{pos[1]}").text
+    
     # username and exif + location
     info = {
         "username": session["username"],
         "id": session["id"],
         "pos": pos,
         "date": date,
-        "address": {
-            "city": address.get("city", ""),
-            "state": address.get("state", ""),
-            "country": address.get("country", "")
-        }
+        "location": location,
     }
     images = db["images"]
     images[hash + ".webp"] = info
@@ -133,6 +125,9 @@ def get_username(image):
 def get_userid(image):
     return db["images"][image]["id"]
 
+def get_location(image):
+    return db["images"][image]["location"]
+
 def sort_date(images):
     sort = []
     for name in images:
@@ -150,8 +145,9 @@ def draw_map(filter):
         if file != ".gitkeep" and filter(file):
             bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
-            location = db["images"][file]["address"]
-            popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), **location)
+            location = db["images"][file]["location"]
+            print(location)
+            popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), location=get_location(file))
             folium.Marker(position, popup).add_to(map)
     map.fit_bounds(bounds, padding=(200,200), max_zoom=14)
     return map
@@ -231,7 +227,7 @@ def view_image(image):
     if "thumbnail" in image:
         return redirect(f"/images/{get_image(image)}")
     if image in db["images"]:
-        return render_template("view_image.html", image=get_image(image), username=get_username(image), **db["images"][image]["address"], userid=get_userid(image))
+        return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image))
     else:
         return render_template("error.html", message="Image does not exist.")
 

@@ -8,10 +8,11 @@ with python3Packages;
     shellHook = ''
     export FLASK_APP=src
     export FLASK_ENV=development
-    alias run="pgrep python | xargs kill -9 2>/dev/null
+    alias run="pgrep georust || georust &
+pgrep python | xargs kill -9 2>/dev/null
 python -m flask run"
     '';
-    propagatedBuildInputs = [flask exif folium pillow geopy sqlitedict];
+    propagatedBuildInputs = [flask exif folium pillow sqlitedict requests];
 
     installPhase = ''
       runHook preInstall

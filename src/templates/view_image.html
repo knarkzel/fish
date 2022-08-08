@@ -3,12 +3,11 @@
 {% block content %}
 
 <h2><a href="/users/{{ username }}">{{ username }}</a></h2>
-{% include 'location.html' %} 
+<p>{{ location }}</p>
 <a class=boxed href="/map/images/{{ image }}">Location</a>
 {% if session["id"] == userid %}
 <a class=boxed style="color:red" href="/images/delete/{{ image }}">DELETE</a>
 {% endif %}
 <img id=view_image src="/static/images/{{ image }}">
-
 
 {% endblock %}
