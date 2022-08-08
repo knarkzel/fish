@@ -8,7 +8,7 @@ with python3Packages;
     shellHook = ''
     export FLASK_APP=src
     export FLASK_ENV=development
-    alias run="pgrep python | xargs kill -9
+    alias run="pgrep python | xargs kill -9 2>/dev/null
 python -m flask run"
     '';
     propagatedBuildInputs = [flask exif folium pillow geopy];
