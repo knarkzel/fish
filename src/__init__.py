@@ -18,18 +18,25 @@ root_folder = pathlib.Path(__file__).parent.resolve()
 image_folder = os.path.join(root_folder, "static/images")
 
 # database
-db_path = "database.sqlite"
-exists = os.path.exists(db_path)
-db = SqliteDict("database.sqlite")
-if not exists:
-    db["users"] = {}
-    db.commit()
-    db["images"] = {}
-    db.commit()
-    db["comments"] = {}
-    db.commit()
+db_path = "database.csv"
+
+def load_database():
+    if os.path.exists(db_path):
+        with open(db_path, "rb") as file:
+            return pickle.load(file)
+    else:
+        return {
+            "users": {},
+            "images": {},
+            "comments": {},
+        }
+
+def save_database(db):
+    with open(db_path, "wb") as file:
+        pickle.dump(db, file)
 
 # flask
+db = load_database()
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
@@ -72,17 +79,9 @@ def store_metadata(image, hash):
         "date": date,
         "location": location,
     }
-    images = db["images"]
-    images[hash + ".webp"] = info
-    images[hash + "-thumbnail.webp"] = info
-    db["images"] = images
-    db.commit()
-
-    # comments
-    comments = db["comments"]
-    comments[image] = []
-    db["comments"] = comments
-    db.commit()
+    db["images"][hash + ".webp"] = info
+    db["images"][hash + "-thumbnail.webp"] = info
+    save_database(db)
 
 def generate_thumbnail(img, hash):
     w = img.size[0]
@@ -178,10 +177,8 @@ def register():
         if id in db["users"]:
             return render_template("error.html", message="User already exists.")
         else:
-            users = db["users"]
-            users[id] = user
-            db["users"] = users
-            db.commit()
+            db["users"][id] = user
+            save_database(db)
             set_session(user)
             return redirect("/")
     else:
@@ -236,13 +233,11 @@ def profile(username):
 
 @app.route("/images/<image>", methods=["GET", "POST"])
 def view_image(image):
+    print(db["comments"])
     if request.method == "POST":
         comment = request.form["comment"]
-        comments = db["comments"]
-        comments[image] = [{ "content": comment }]
-        db["comments"] = comments
-        db.commit()
-        print(db["comments"][image])
+        db["comments"][image] = [{ "content": comment }]
+        save_database(db)
         return redirect("/images/" + image)
     else:
         if "thumbnail" in image:
