@@ -160,7 +160,6 @@ def draw_map(filter):
             bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
             location = db["images"][file]["location"]
-            print(location)
             popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), location=get_location(file))
             folium.Marker(position, popup).add_to(map)
     map.fit_bounds(bounds, padding=(200,200), max_zoom=14)
@@ -272,11 +271,21 @@ def map_user(username):
 # delete
 @app.route("/delete/images/<image>")
 def delete_image(image):
-    print(get_userid(image))
-    print(session["id"])
     if session["id"] == get_userid(image):
         os.remove(image_folder + "/" + image)
         os.remove(image_folder + "/" + get_thumbnail(image))
         return redirect("/users/"+get_username(image))
     else:
         return render_template("error.html", message="No access.")
+
+# delete
+@app.route("/delete/comments/<image>/<comment>")
+def delete_comment(image, comment):
+    comments = get_comments(image)
+    if session["id"] == get_userid(image):
+        del comments[int(comment)]
+        save_database(db)
+        return redirect("/images/" + image)
+    else:
+        return render_template("error.html", message="No access.")
+    

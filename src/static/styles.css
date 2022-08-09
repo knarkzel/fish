@@ -88,6 +88,7 @@ input[type=submit] {
 }
 
 .boxed {
+    background: white;
     color: #222;
     padding: 0.5em;
     border-radius: 0.25em;
@@ -116,8 +117,8 @@ input[type=submit] {
 }
 
 #split h2, p { margin-top: 0; }
-.comment p, h3 { margin: 0.25em 0; }
-.comment h3 > span { font-weight: normal; }
 input[name="comment"] { width: 100%; }
-
+.comment h3 > span { font-weight: normal; }
+.comment p, h3 { margin: 0.25em 0; font-size: 1em; }
+.comment #delete { float: right; font-weight: normal; }
 

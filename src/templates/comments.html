@@ -17,6 +17,7 @@
   <h3>
     <a href="/users/{{ comment.username }}">{{ comment.username }}</a>
     <span>| {{ comment.time }}</span>
+    <a class=boxed id=delete href="/delete/comments/{{ image }}/{{ loop.index - 1}}">Delete</a>
   </h3>
   <p>{{ comment.content }}</p>
 </div>
