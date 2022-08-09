@@ -10,7 +10,7 @@ in {
   options.services.fish = {
     enable = lib.mkEnableOption "fish";
     georust = lib.mkOption {
-      type = lib.types.string;
+      type = lib.types.str;
       description = "Link to georust service";
     };
     port = lib.mkOption {
@@ -35,9 +35,9 @@ in {
       wantedBy = ["multi-user.target"];
       serviceConfig = {
         Environment = ''
-          IMAGES=${cfg.images};
-          GEORUST=${cfg.georust};
-          DATABASE=${cfg.database};
+          IMAGES=${cfg.images}
+          GEORUST=${cfg.georust}
+          DATABASE=${cfg.database}
         '';
 
         ExecStart = "${appEnv}/bin/waitress-serve --port=${toString cfg.port} fish:app";
