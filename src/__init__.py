@@ -12,13 +12,13 @@ import requests
 from exif import Image
 from datetime import datetime
 from sqlitedict import SqliteDict
-from PIL import ExifTags, Image as PILImage
 from PIL.ExifTags import TAGS, GPSTAGS
+from PIL import ExifTags, Image as PILImage
 from flask import Flask, render_template, request, redirect, flash, session
 
 # folders
 root_folder = pathlib.Path(__file__).parent.resolve()
-image_folder = os.path.join(root_folder, "static/images")
+image_folder = os.getenv("IMAGE_FOLDER", default=os.path.join(root_folder, "static/images"))
 
 # database
 db_path = "database.csv"

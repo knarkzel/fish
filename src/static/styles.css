@@ -69,8 +69,8 @@ main {
 #images {
     margin-top: 1em;
     display: grid;
-    grid-gap: 0.5em;
-    grid-template-columns: repeat(3, minmax(15em, 18em));
+    grid-gap: 0 0.5em;
+    grid-template-columns: repeat(3, minmax(18em, 21em));
 }
 
 img {
