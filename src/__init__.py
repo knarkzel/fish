@@ -14,15 +14,15 @@ from datetime import datetime
 from sqlitedict import SqliteDict
 from PIL.ExifTags import TAGS, GPSTAGS
 from PIL import ExifTags, Image as PILImage
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash, session, send_from_directory
 
 # folders
 root_folder = pathlib.Path(__file__).parent.resolve()
-image_folder = os.getenv("IMAGE_FOLDER", default=os.path.join(root_folder, "static/images"))
+image_folder = os.getenv("IMAGES", default=os.path.join(root_folder, "images"))
+db_path = os.getenv("DATABASE", default=os.path.join(root_folder, "database.csv"))
+georust = os.getenv("GEORUST", default="http://0.0.0.0:8080/")
 
 # database
-db_path = "database.csv"
-
 def load_database():
     if os.path.exists(db_path):
         with open(db_path, "rb") as file:
@@ -309,4 +309,3 @@ def delete_comment(image, comment):
         return redirect("/images/" + image)
     else:
         return render_template("error.html", message="No access.")
-    
