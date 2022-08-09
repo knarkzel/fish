@@ -309,3 +309,8 @@ def delete_comment(image, comment):
         return redirect("/images/" + image)
     else:
         return render_template("error.html", message="No access.")
+
+# uploads
+@app.route("/uploads/<path:image>")
+def uploads(image):
+    return send_from_directory(image_folder, image)

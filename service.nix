@@ -9,7 +9,12 @@
 in {
   options.services.fish = {
     enable = lib.mkEnableOption "fish";
+    georust = lib.mkOption {
+      type = lib.types.string;
+      description = "Link to georust service";
+    };
     port = lib.mkOption {
+      default = 5000;
       type = lib.types.int;
       description = "Port to run application on";
     };
@@ -17,10 +22,6 @@ in {
       default = "/tmp";
       type = lib.types.path;
       description = "Where to store images";
-    };
-    georust = lib.mkOption {
-      type = lib.types.string;
-      description = "Link to georust service";
     };
     database = lib.mkOption {
       default = "/tmp/database.csv";

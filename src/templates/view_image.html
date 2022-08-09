@@ -10,7 +10,7 @@
     {% if session["id"] == userid %}
     <a class=boxed href="/delete/images/{{ image }}">Delete</a>
     {% endif %}
-    <img id=view_image src="/static/images/{{ image }}">
+    <img id=view_image src="/uploads/{{ image }}">
   </div>
   <div>
     {% include 'comments.html' %}
