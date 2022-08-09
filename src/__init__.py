@@ -156,12 +156,14 @@ def sort_date(images):
 def draw_map(filter):
     bounds = []
     map = folium.Map(attributionControl=False, max_bounds=True, zoomSnap=0.1)
+    now = datetime.now()
     for file in os.listdir(image_folder):
         if file != ".gitkeep" and filter(file):
             bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
             location = db["images"][file]["location"]
-            popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), location=get_location(file))
+            time = timeago.format(db["images"][file]["date"], now)
+            popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), location=get_location(file), time=time)
             folium.Marker(position, popup).add_to(map)
     map.fit_bounds(bounds, padding=(200,200), max_zoom=14)
     return map
@@ -265,7 +267,9 @@ def view_image(image):
             comments = copy.deepcopy(get_comments(image))
             for comment in comments:
                 comment["time"] = timeago.format(comment["time"], now)
-            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments=comments)
+            image = get_image(image)
+            time = timeago.format(db["images"][image]["date"], now)
+            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), time=time, comments=comments)
         else:
             return render_template("error.html", message="Image does not exist.")
 
