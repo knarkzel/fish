@@ -19,6 +19,7 @@ in {
     systemd.services.fish = {
       wantedBy = ["multi-user.target"];
       serviceConfig = {
+        Environment = "IMAGE_FOLDER=/tmp";
         ExecStart = "${appEnv}/bin/waitress-serve --port=${toString cfg.port} fish:app";
       };
     };
