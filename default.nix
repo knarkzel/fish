@@ -12,7 +12,7 @@ with python3Packages;
 pgrep python | xargs kill -9 2>/dev/null
 python -m flask run"
     '';
-    propagatedBuildInputs = [flask exif folium pillow sqlitedict requests];
+    propagatedBuildInputs = [flask exif folium pillow sqlitedict requests timeago];
 
     installPhase = ''
       runHook preInstall

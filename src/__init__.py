@@ -1,11 +1,13 @@
 import io
 import os
+import copy
 import base64
 import pickle
 import folium
 import secrets
 import hashlib
 import pathlib
+import timeago
 import requests
 from exif import Image
 from datetime import datetime
@@ -250,19 +252,20 @@ def profile(username):
 
 @app.route("/images/<image>", methods=["GET", "POST"])
 def view_image(image):
-    print(db["comments"])
-
     if request.method == "POST":
         comment = request.form["comment"]
         db["comments"][image].append({ "content": comment, "username": session["username"], "time": datetime.now()})
         save_database(db)
-
         return redirect("/images/" + image)
     else:
         if "thumbnail" in image:
             return redirect(f"/images/{get_image(image)}")
         if image in db["images"]:
-            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments=get_comments(image))
+            now = datetime.now()
+            comments = copy.deepcopy(get_comments(image))
+            for comment in comments:
+                comment["time"] = timeago.format(comment["time"], now)
+            return render_template("view_image.html", image=get_image(image), username=get_username(image), location=get_location(image), userid=get_userid(image), comments=comments)
         else:
             return render_template("error.html", message="Image does not exist.")
 
@@ -285,11 +288,21 @@ def map_user(username):
 # delete
 @app.route("/delete/images/<image>")
 def delete_image(image):
-    print(get_userid(image))
-    print(session["id"])
     if session["id"] == get_userid(image):
         os.remove(image_folder + "/" + image)
         os.remove(image_folder + "/" + get_thumbnail(image))
         return redirect("/users/"+get_username(image))
     else:
         return render_template("error.html", message="No access.")
+
+# delete
+@app.route("/delete/comments/<image>/<comment>")
+def delete_comment(image, comment):
+    comments = get_comments(image)
+    if session["id"] == get_userid(image):
+        del comments[int(comment)]
+        save_database(db)
+        return redirect("/images/" + image)
+    else:
+        return render_template("error.html", message="No access.")
+    

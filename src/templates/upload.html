@@ -1,9 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Upload new file</h1>
+<h2>Upload new file</h2>
+
+{% if session["id"]|length %}
 <form method="post" enctype="multipart/form-data">
   <input type="file" name="file" multiple>
   <input type="submit" value="Upload">
 </form>
+{% else %}
+<form method="post" enctype="multipart/form-data">
+  <input type="file" name="file" disabled>
+  <input type="submit" value="Upload" disabled>
+</form>
+{% endif %}
+
 {% endblock %}
