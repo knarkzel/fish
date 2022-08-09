@@ -10,7 +10,8 @@ import requests
 from exif import Image
 from datetime import datetime
 from sqlitedict import SqliteDict
-from PIL import Image as PILImage
+from PIL import ExifTags, Image as PILImage
+from PIL.ExifTags import TAGS, GPSTAGS
 from flask import Flask, render_template, request, redirect, flash, session
 
 # folders
@@ -158,7 +159,6 @@ def draw_map(filter):
             bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
             location = db["images"][file]["location"]
-            print(location)
             popup = render_template("popup.html", username=get_username(file), image=get_thumbnail(file), location=get_location(file))
             folium.Marker(position, popup).add_to(map)
     map.fit_bounds(bounds, padding=(200,200), max_zoom=14)
@@ -205,20 +205,36 @@ def logout():
     
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
+    missing = []
     if request.method == "POST":
-        # hash
-        file = request.files["file"]
-        bytes = file.read()
-        hash = hashlib.sha256(bytes).hexdigest()
+        files = request.files.getlist("file")
+        for file in files:
+            # hash
+            bytes = file.read()
+            hash = hashlib.sha256(bytes).hexdigest()
         
-        # save as webp
-        name = hash + ".webp"
-        path = os.path.join(image_folder, name)
-        image = PILImage.open(io.BytesIO(bytes))
-        image.save(path, format="webp")
-        generate_thumbnail(image, hash)
-        store_metadata(bytes, hash)
-        return redirect("/")
+            # save as webp
+            name = hash + ".webp"
+            path = os.path.join(image_folder, name)
+            with PILImage.open(io.BytesIO(bytes)) as image:
+                check = {
+                    ExifTags.TAGS[k]
+                    for k, v in image._getexif().items()
+                    if k in ExifTags.TAGS
+                }
+                if "GPSInfo" in check:
+                    image.save(path, format="webp")
+                    generate_thumbnail(image, hash)
+                    store_metadata(bytes, hash)
+                else:
+                    missing.append(file.filename)
+        if len(missing):
+            for name in missing:
+                message = str(name + " ")
+            message = message + "- missing GPS info, rest have been uploaded."
+            return render_template("error.html", message=message)
+        else:
+            return redirect("/")
     else:
         return render_template("upload.html")
 
