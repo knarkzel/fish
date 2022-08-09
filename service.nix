@@ -34,9 +34,12 @@ in {
     systemd.services.fish = {
       wantedBy = ["multi-user.target"];
       serviceConfig = {
-        Environment = "IMAGES=${cfg.images}";
-        Environment = "GEORUST=${cfg.georust}";
-        Environment = "DATABASE=${cfg.database}";
+        Environment = ''
+          IMAGES=${cfg.images};
+          GEORUST=${cfg.georust};
+          DATABASE=${cfg.database};
+        '';
+
         ExecStart = "${appEnv}/bin/waitress-serve --port=${toString cfg.port} fish:app";
       };
     };
