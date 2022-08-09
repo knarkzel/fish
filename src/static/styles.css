@@ -69,7 +69,7 @@ main {
 #images {
     margin-top: 1em;
     display: grid;
-    grid-gap: 0 0.5em;
+    grid-gap: 0.5em 1em;
     grid-template-columns: repeat(3, minmax(18em, 21em));
 }
 
