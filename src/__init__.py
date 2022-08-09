@@ -235,10 +235,12 @@ def profile(username):
 @app.route("/images/<image>", methods=["GET", "POST"])
 def view_image(image):
     print(db["comments"])
+
     if request.method == "POST":
         comment = request.form["comment"]
-        db["comments"][image].append({ "content": comment })
+        db["comments"][image].append({ "content": comment, "username": session["username"], "time": datetime.now()})
         save_database(db)
+
         return redirect("/images/" + image)
     else:
         if "thumbnail" in image:

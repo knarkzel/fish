@@ -3,7 +3,15 @@
   <input type="text" name="comment"/>
   <input type="submit" value="Submit"/>
 </form>
-<h3>Comments</h3>
+
+<h2>Comments (x)</h2>
+
 {% for comment in comments %}
-<h1>{{ comment.content }}</h1>
+
+<div style=color:black>
+  <h3>{{ comment.username }}</h3>
+  <p>{{ comment.content }}</p>
+  <i>{{ comment.time }}</i>
+</div>
+
 {% endfor %}
