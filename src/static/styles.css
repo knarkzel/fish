@@ -113,6 +113,8 @@ input[type=submit] {
     margin: 0.75em 0;
     border-radius: 0.25em;
     padding: 0.25em 0.5em;
+    word-wrap: break-word;
+    word-break: break-word;
     background: var(--bg-color-hover);
 }
 

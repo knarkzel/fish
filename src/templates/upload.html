@@ -2,8 +2,17 @@
 
 {% block content %}
 <h1>Upload new file</h1>
+
+{% if session["id"]|length %}
 <form method="post" enctype="multipart/form-data">
   <input type="file" name="file">
   <input type="submit" value="Upload">
 </form>
+{% else %}
+<form method="post" enctype="multipart/form-data">
+  <input type="file" name="file" disabled>
+  <input type="submit" value="Upload" disabled>
+</form>
+{% endif %}
+
 {% endblock %}
