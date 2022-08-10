@@ -20,7 +20,7 @@ from flask import Flask, render_template, request, redirect, flash, session, sen
 root_folder = pathlib.Path(__file__).parent.resolve()
 image_folder = os.getenv("IMAGES", default=os.path.join(root_folder, "images"))
 db_path = os.getenv("DATABASE", default=os.path.join(root_folder, "database.csv"))
-georust = os.getenv("GEORUST", default="http://0.0.0.0:8080/")
+georust = os.getenv("GEORUST", default="http://0.0.0.0:8080")
 
 # database
 def load_database():
@@ -72,7 +72,8 @@ def store_metadata(image, hash):
         new = (new[0]+new[1]/60.0+new[2]/3600.0) * (-1 if ref in ["S","W"] else 1)
         pos.append(new)
     date = datetime.now()
-    location = requests.get(f"http://0.0.0.0:8080/{pos[0]}/{pos[1]}").text
+    url = os.path.join(georust, str(pos[0]), str(pos[1]))
+    location = requests.get(url).text
     
     # username and exif + location
     info = {
