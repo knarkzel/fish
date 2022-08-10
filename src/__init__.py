@@ -118,7 +118,7 @@ def generate_thumbnail(img, hash):
 def get_images(filter):
     images = []
     for file in os.listdir(image_folder):
-        if file != ".gitkeep" and filter(file):
+        if file != ".gitkeep" and filter(file) and ".webp" in file:
             images.append(file)
     return images
 
@@ -159,7 +159,7 @@ def draw_map(filter):
     map = folium.Map(attributionControl=False, max_bounds=True, zoomSnap=0.1)
     now = datetime.now()
     for file in os.listdir(image_folder):
-        if file != ".gitkeep" and filter(file):
+        if file != ".gitkeep" and filter(file) and ".webp" in file:
             bounds.append(db["images"][file]["pos"])
             position = db["images"][file]["pos"]
             location = db["images"][file]["location"]
